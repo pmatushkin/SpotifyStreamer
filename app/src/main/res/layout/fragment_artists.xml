@@ -24,7 +24,8 @@ see http://shayla.sawchenko.net/blog/android/2013/09/05/Disable-Softkeyboard/ fo
         android:layout_height="wrap_content"
         android:id="@+id/edtArtist"
         android:layout_gravity="top"
-        android:inputType="textAutoComplete">
+        android:inputType="textAutoComplete"
+        android:singleLine="true">
     </EditText>
 
     <ListView

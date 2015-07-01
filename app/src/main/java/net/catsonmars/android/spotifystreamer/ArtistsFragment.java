@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,10 +55,13 @@ public class ArtistsFragment extends Fragment {
     }
 
     private void updateArtists(String searchArgument) {
-        /* TODO: handle the case when searchArgument is empty (Spotify throws a 400 Bad Request); display Toast or something */
-
-        FetchArtistsTask task = new FetchArtistsTask();
-        task.execute(searchArgument);
+        if (searchArgument.isEmpty()) {
+            Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_term), Toast.LENGTH_SHORT);
+            toast.show();
+        } else {
+            FetchArtistsTask task = new FetchArtistsTask();
+            task.execute(searchArgument);
+        }
     }
 
     public class FetchArtistsTask extends AsyncTask<String, Void, ArrayList<SpotifyArtist>> {

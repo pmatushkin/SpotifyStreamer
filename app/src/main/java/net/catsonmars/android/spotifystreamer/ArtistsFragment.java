@@ -56,6 +56,7 @@ public class ArtistsFragment extends Fragment {
 
     private void updateArtists(String searchArgument) {
         if (searchArgument.isEmpty()) {
+            /* TODO: test "empty term" toast when the real search is implemented */
             Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_term), Toast.LENGTH_SHORT);
             toast.show();
         } else {
@@ -95,6 +96,12 @@ public class ArtistsFragment extends Fragment {
 
             for(SpotifyArtist spotifyArtist : artists) {
                 mArtistsAdapter.add(spotifyArtist);
+            }
+
+            if (mArtistsAdapter.isEmpty()) {
+                /* TODO: test "empty results" toast when the real search is implemented */
+                Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_results), Toast.LENGTH_SHORT);
+                toast.show();
             }
         }
 

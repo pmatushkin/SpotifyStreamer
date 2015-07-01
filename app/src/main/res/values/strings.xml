@@ -5,4 +5,5 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="warn_empty_search_term">Enter search term</string>
+    <string name="warn_empty_search_results">No artists are found</string>
 </resources>

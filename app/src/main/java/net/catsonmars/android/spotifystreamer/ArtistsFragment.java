@@ -3,15 +3,16 @@ package net.catsonmars.android.spotifystreamer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -27,16 +28,6 @@ public class ArtistsFragment extends Fragment {
 
     ArtistsAdapter mArtistsAdapter;
 
-    public ArtistsFragment() {
-    }
-
-    @Override
-    public void onStart(){
-        super.onStart();
-
-        updateArtists("motorhead");
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -51,14 +42,34 @@ public class ArtistsFragment extends Fragment {
         ListView listView = (ListView)rootView.findViewById(R.id.lvArtists);
         listView.setAdapter(mArtistsAdapter);
 
+        EditText edtArtist = (EditText)rootView.findViewById(R.id.edtArtist);
+        edtArtist.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                updateArtists(s.toString());
+            }
+        });
+
         return rootView;
     }
 
     private void updateArtists(String searchArgument) {
         if (searchArgument.isEmpty()) {
-            /* TODO: test "empty term" toast when the real search is implemented */
+            /* Removed this toast, because it pops up too often, cluttering the screen */
+            /*
             Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_term), Toast.LENGTH_SHORT);
             toast.show();
+            */
         } else {
             FetchArtistsTask task = new FetchArtistsTask();
             task.execute(searchArgument);
@@ -68,24 +79,20 @@ public class ArtistsFragment extends Fragment {
     public class FetchArtistsTask extends AsyncTask<String, Void, ArrayList<SpotifyArtist>> {
         @Override
         protected ArrayList<SpotifyArtist> doInBackground(String... params) {
-            SpotifyApi api = new SpotifyApi();
-
-            SpotifyService spotify = api.getService();
-
-            /* TODO: handle the case when the use enters the exact name of the artist, and we would want to place the found artist on the top of the list */
-
-            ArtistsPager artists = spotify.searchArtists(params[0]);
-
             ArrayList<SpotifyArtist> spotifyArtists = new ArrayList<SpotifyArtist>();
 
-            for(Artist artist : artists.artists.items) {
+            SpotifyApi api = new SpotifyApi();
+            SpotifyService spotify = api.getService();
+            ArtistsPager artists = spotify.searchArtists(params[0]);
 
+            for(Artist artist : artists.artists.items) {
                 SpotifyArtist spotifyArtist = getSpotifyArtist(artist);
 
                 spotifyArtists.add(spotifyArtist);
             }
 
-            Collections.sort(spotifyArtists, new SpotifyArtistComparator());
+            /* Removed the custom sorting; looks like Spotify sorts the results internally */
+            /* Collections.sort(spotifyArtists, new SpotifyArtistComparator()); */
 
             return spotifyArtists;
         }
@@ -99,7 +106,6 @@ public class ArtistsFragment extends Fragment {
             }
 
             if (mArtistsAdapter.isEmpty()) {
-                /* TODO: test "empty results" toast when the real search is implemented */
                 Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_results), Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -117,10 +123,13 @@ public class ArtistsFragment extends Fragment {
         }
     }
 
+    /* Removed the custom sorting; looks like Spotify sorts the results internally */
+    /*
     public class SpotifyArtistComparator implements Comparator<SpotifyArtist>
     {
         public int compare(SpotifyArtist left, SpotifyArtist right) {
             return left.Name.compareTo(right.Name);
         }
     }
+    */
 }

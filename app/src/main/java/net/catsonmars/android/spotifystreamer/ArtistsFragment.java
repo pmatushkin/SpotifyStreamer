@@ -34,7 +34,7 @@ public class ArtistsFragment extends Fragment {
         mArtistsAdapter = new ArtistsAdapter(
                 getActivity(),
                 R.layout.list_item_artist,
-                R.id.txtArtist,
+                R.id.txtArtistName,
                 new ArrayList<SpotifyArtist>());
 
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
@@ -113,6 +113,7 @@ public class ArtistsFragment extends Fragment {
 
         private SpotifyArtist getSpotifyArtist(Artist artist) {
             SpotifyArtist spotifyArtist = new SpotifyArtist();
+
             spotifyArtist.ID = artist.id;
             spotifyArtist.Name = artist.name;
             if (!artist.images.isEmpty()) {

@@ -1,5 +1,6 @@
 package net.catsonmars.android.spotifystreamer;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -26,7 +28,16 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class ArtistsFragment extends Fragment {
 
-    ArtistsAdapter mArtistsAdapter;
+    private ArtistsAdapter mArtistsAdapter;
+
+    /*private String searchArgument = "";
+
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        updateArtists(searchArgument);
+    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,6 +52,17 @@ public class ArtistsFragment extends Fragment {
 
         ListView listView = (ListView)rootView.findViewById(R.id.lvArtists);
         listView.setAdapter(mArtistsAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SpotifyArtist artist = (SpotifyArtist) parent.getAdapter().getItem(position);
+
+                Intent detailIntent = new Intent(getActivity(), TopTenTracksActivity.class);
+                detailIntent.putExtra(Intent.EXTRA_TEXT, artist.ID);
+                startActivity(detailIntent);
+            }
+        });
 
         EditText edtArtist = (EditText)rootView.findViewById(R.id.edtArtist);
         edtArtist.addTextChangedListener(new TextWatcher() {
@@ -62,6 +84,11 @@ public class ArtistsFragment extends Fragment {
 
         return rootView;
     }
+
+    /*private void updateArtists(String searchArgument) {
+        this.searchArgument = searchArgument;
+        updateArtists();
+    }*/
 
     private void updateArtists(String searchArgument) {
         if (searchArgument.isEmpty()) {

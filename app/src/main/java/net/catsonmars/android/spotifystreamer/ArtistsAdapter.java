@@ -52,7 +52,7 @@ public class ArtistsAdapter extends ArrayAdapter<SpotifyArtist> {
                     Picasso.with(context)
                             .load(R.drawable.img_spotify_default)
                             .resize(200, 200)
-                            .centerCrop()
+                            //.centerCrop()
                             .into(img);
                 } else {
                     Picasso.with(context)
@@ -60,7 +60,7 @@ public class ArtistsAdapter extends ArrayAdapter<SpotifyArtist> {
                             .placeholder(R.drawable.img_spotify_default)
                             .error(R.drawable.img_spotify_default)
                             .resize(200, 200)
-                            .centerCrop()
+                            //.centerCrop()
                             .into(img);
                 }
             }

@@ -3,6 +3,7 @@ package net.catsonmars.android.spotifystreamer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +15,7 @@ public class TopTenTracksActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_ten_tracks);
+        setSubTitle();
     }
 
 
@@ -51,5 +53,20 @@ public class TopTenTracksActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setSubTitle() {
+        String extra = Intent.EXTRA_TITLE;
+
+        String subTitle = "";
+        Intent intent = getIntent();
+        if ((intent != null) && intent.hasExtra(extra)) {
+            subTitle = intent.getStringExtra(extra);
+
+            if (!subTitle.isEmpty()) {
+                ActionBar ab = getSupportActionBar();
+                ab.setSubtitle(subTitle);
+            }
+        }
     }
 }

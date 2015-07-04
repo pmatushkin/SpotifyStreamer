@@ -105,8 +105,8 @@ public class ArtistsFragment extends Fragment {
         protected void onPostExecute(ArrayList<Artist> artists) {
             mArtistsAdapter.clear();
 
-            for(Artist spotifyArtist : artists) {
-                mArtistsAdapter.add(spotifyArtist);
+            for(Artist artist : artists) {
+                mArtistsAdapter.add(artist);
             }
 
             if (mArtistsAdapter.isEmpty()) {

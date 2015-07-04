@@ -8,6 +8,7 @@
 
     <string name="hint_artist_icon">Artist icon</string>
     <string name="hint_search">Search artists</string>
+    <string name="hint_track_icon">Track icon</string>
 
     <string name="title_activity_top_ten_tracks">Top 10 Tracks</string>
 

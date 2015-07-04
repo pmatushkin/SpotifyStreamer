@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
 public class TopTenTracksActivityFragment extends Fragment {
 
     String LOG_TAG = "";
+    TopTenTracksAdapter mTracksAdapter;
 
     public TopTenTracksActivityFragment() {
     }
@@ -36,7 +37,16 @@ public class TopTenTracksActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         LOG_TAG = getString(R.string.app_log_tag);
 
+        mTracksAdapter = new TopTenTracksAdapter(
+                getActivity(),
+                R.layout.list_item_track,
+                R.id.txtTrackName,
+                new ArrayList<Track>());
+
         View rootView = inflater.inflate(R.layout.fragment_top_ten_tracks, container, false);
+
+        ListView listView = (ListView)rootView.findViewById(R.id.lvTracks);
+        listView.setAdapter(mTracksAdapter);
 
         String extra = Intent.EXTRA_TEXT;
 
@@ -44,8 +54,6 @@ public class TopTenTracksActivityFragment extends Fragment {
         Intent intent = getActivity().getIntent();
         if ((intent != null) && intent.hasExtra(extra)) {
             artistID = intent.getStringExtra(extra);
-
-            ((TextView)rootView.findViewById(R.id.txtArtistID)).setText(artistID);
         }
 
         fetchTopTenTracks(artistID);
@@ -91,18 +99,18 @@ public class TopTenTracksActivityFragment extends Fragment {
             if (tracks == null) {
                 Toast toast = Toast.makeText(getActivity(), getString(R.string.error_search_top_tracks), Toast.LENGTH_SHORT);
                 toast.show();
+            } else {
+                mTracksAdapter.clear();
+
+                for (Track track : tracks) {
+                    mTracksAdapter.add(track);
+                }
+
+                if (mTracksAdapter.isEmpty()) {
+                    Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_top_tracks), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             }
-
-            /*mArtistsAdapter.clear();
-
-            for(Artist spotifyArtist : artists) {
-                mArtistsAdapter.add(spotifyArtist);
-            }
-
-            if (mArtistsAdapter.isEmpty()) {
-                Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_top_tracks), Toast.LENGTH_SHORT);
-                toast.show();
-            }*/
         }
     }
 }

@@ -24,20 +24,10 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 /**
  * A placeholder fragment containing a simple view.
- * Comparator code is adapted from http://stackoverflow.com/questions/10853205/android-sort-arraylist-by-properties
  */
 public class ArtistsFragment extends Fragment {
 
     private ArtistsAdapter mArtistsAdapter;
-
-    /*private String searchArgument = "";
-
-    @Override
-    public void onStart(){
-        super.onStart();
-
-        updateArtists(searchArgument);
-    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,7 +36,7 @@ public class ArtistsFragment extends Fragment {
                 getActivity(),
                 R.layout.list_item_artist,
                 R.id.txtArtistName,
-                new ArrayList<SpotifyArtist>());
+                new ArrayList<Artist>());
 
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
 
@@ -56,10 +46,10 @@ public class ArtistsFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SpotifyArtist artist = (SpotifyArtist) parent.getAdapter().getItem(position);
+                Artist artist = (Artist) parent.getAdapter().getItem(position);
 
                 Intent detailIntent = new Intent(getActivity(), TopTenTracksActivity.class);
-                detailIntent.putExtra(Intent.EXTRA_TEXT, artist.ID);
+                detailIntent.putExtra(Intent.EXTRA_TEXT, artist.id);
                 startActivity(detailIntent);
             }
         });
@@ -85,11 +75,6 @@ public class ArtistsFragment extends Fragment {
         return rootView;
     }
 
-    /*private void updateArtists(String searchArgument) {
-        this.searchArgument = searchArgument;
-        updateArtists();
-    }*/
-
     private void updateArtists(String searchArgument) {
         if (searchArgument.isEmpty()) {
             /* Removed this toast, because it pops up too often, cluttering the screen */
@@ -103,32 +88,27 @@ public class ArtistsFragment extends Fragment {
         }
     }
 
-    public class FetchArtistsTask extends AsyncTask<String, Void, ArrayList<SpotifyArtist>> {
+    public class FetchArtistsTask extends AsyncTask<String, Void, ArrayList<Artist>> {
         @Override
-        protected ArrayList<SpotifyArtist> doInBackground(String... params) {
-            ArrayList<SpotifyArtist> spotifyArtists = new ArrayList<SpotifyArtist>();
+        protected ArrayList<Artist> doInBackground(String... params) {
+            ArrayList<Artist> spotifyArtists = new ArrayList<Artist>();
 
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
             ArtistsPager artists = spotify.searchArtists(params[0]);
 
             for(Artist artist : artists.artists.items) {
-                SpotifyArtist spotifyArtist = getSpotifyArtist(artist);
-
-                spotifyArtists.add(spotifyArtist);
+                spotifyArtists.add(artist);
             }
-
-            /* Removed the custom sorting; looks like Spotify sorts the results internally */
-            /* Collections.sort(spotifyArtists, new SpotifyArtistComparator()); */
 
             return spotifyArtists;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<SpotifyArtist> artists) {
+        protected void onPostExecute(ArrayList<Artist> artists) {
             mArtistsAdapter.clear();
 
-            for(SpotifyArtist spotifyArtist : artists) {
+            for(Artist spotifyArtist : artists) {
                 mArtistsAdapter.add(spotifyArtist);
             }
 
@@ -137,27 +117,5 @@ public class ArtistsFragment extends Fragment {
                 toast.show();
             }
         }
-
-        private SpotifyArtist getSpotifyArtist(Artist artist) {
-            SpotifyArtist spotifyArtist = new SpotifyArtist();
-
-            spotifyArtist.ID = artist.id;
-            spotifyArtist.Name = artist.name;
-            if (!artist.images.isEmpty()) {
-                spotifyArtist.Image = artist.images.get(0);
-            }
-
-            return spotifyArtist;
-        }
     }
-
-    /* Removed the custom sorting; looks like Spotify sorts the results internally */
-    /*
-    public class SpotifyArtistComparator implements Comparator<SpotifyArtist>
-    {
-        public int compare(SpotifyArtist left, SpotifyArtist right) {
-            return left.Name.compareTo(right.Name);
-        }
-    }
-    */
 }

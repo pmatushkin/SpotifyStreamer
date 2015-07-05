@@ -12,6 +12,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 
 /**
@@ -39,28 +40,42 @@ public class TopTenTracksAdapter extends ArrayAdapter<Track> {
 
         Track o = items.get(position);
         if (o != null) {
-            TextView tt = (TextView) v.findViewById(R.id.txtTrackName);
+            TextView tt;
+            ImageView img;
+
+            tt = (TextView) v.findViewById(R.id.txtTrackName);
             if (tt == null) {
             } else {
                 tt.setText(o.name);
             }
 
-            ImageView img = (ImageView) v.findViewById(R.id.imgTrackIcon);
+            tt = (TextView) v.findViewById(R.id.txtAlbumName);
+            if (tt == null) {
+            } else {
+                tt.setText(o.album.name);
+            }
+
+            img = (ImageView) v.findViewById(R.id.imgTrackIcon);
             if (img == null) {
             } else {
                 if (o.album.images == null || o.album.images.isEmpty()) {
                     Picasso.with(context)
                             .load(R.drawable.img_spotify_default)
                             .resize(200, 200)
-                                    //.centerCrop()
                             .into(img);
                 } else {
+                    // try to get the medium size image for the list view
+                    Image image;
+                    if (o.album.images.size() >= 2)
+                        image = o.album.images.get(1);
+                    else
+                        image = o.album.images.get(0);
+
                     Picasso.with(context)
-                            .load(o.album.images.get(0).url)
+                            .load(image.url)
                             .placeholder(R.drawable.img_spotify_default)
                             .error(R.drawable.img_spotify_default)
                             .resize(200, 200)
-                                    //.centerCrop()
                             .into(img);
                 }
             }

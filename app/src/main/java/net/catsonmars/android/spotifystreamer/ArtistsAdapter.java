@@ -15,9 +15,8 @@ import java.util.ArrayList;
 import kaaes.spotify.webapi.android.models.Artist;
 
 /**
- * Created by pmatushkin on 6/30/2015.
  * Custom adapter code is adapted from http://www.softwarepassion.com/android-series-custom-listview-items-and-adapters/
- * Spotify icon is extracted from the Spotify Design Resources package at https://developer.spotify.com/design/
+ * Spotify icon is cropped from the Spotify Design Resources package at https://developer.spotify.com/design/
  */
 public class ArtistsAdapter extends ArrayAdapter<Artist> {
 
@@ -41,20 +40,22 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
 
         Artist o = items.get(position);
         if (o != null) {
-            TextView tt = (TextView) v.findViewById(R.id.txtArtistName);
+            TextView tt;
+            ImageView img;
+
+            tt = (TextView) v.findViewById(R.id.txtArtistName);
             if (tt == null) {
             } else {
                 tt.setText(o.name);
             }
 
-            ImageView img = (ImageView) v.findViewById(R.id.imgArtistIcon);
+            img = (ImageView) v.findViewById(R.id.imgArtistIcon);
             if (img == null) {
             } else {
                 if (o.images == null || o.images.isEmpty()) {
                     Picasso.with(context)
                             .load(R.drawable.img_spotify_default)
                             .resize(200, 200)
-                            //.centerCrop()
                             .into(img);
                 } else {
                     Picasso.with(context)
@@ -62,7 +63,6 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
                             .placeholder(R.drawable.img_spotify_default)
                             .error(R.drawable.img_spotify_default)
                             .resize(200, 200)
-                            //.centerCrop()
                             .into(img);
                 }
             }

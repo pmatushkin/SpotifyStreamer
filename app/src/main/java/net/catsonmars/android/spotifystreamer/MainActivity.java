@@ -8,7 +8,7 @@ import android.view.MenuItem;
 
 
 /**
- * The code for retaining the fragment state was adopted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
+ * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
  */
 public class MainActivity extends ActionBarActivity {
 

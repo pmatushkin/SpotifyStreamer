@@ -22,14 +22,21 @@ import kaaes.spotify.webapi.android.models.Tracks;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
  */
 public class TopTenTracksActivityFragment extends Fragment {
 
     String LOG_TAG = "";
     TopTenTracksAdapter mTracksAdapter;
+    private String mSearchArgument;
+    ArrayList<Track> mSpotifyTracks;
 
-    public TopTenTracksActivityFragment() {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Retain this fragment across configuration changes.
+        setRetainInstance(true);
     }
 
     @Override
@@ -37,11 +44,14 @@ public class TopTenTracksActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         LOG_TAG = getString(R.string.app_log_tag);
 
+        if (mSpotifyTracks == null)
+            mSpotifyTracks = new ArrayList<Track>();
+
         mTracksAdapter = new TopTenTracksAdapter(
                 getActivity(),
                 R.layout.list_item_track,
                 R.id.txtTrackName,
-                new ArrayList<Track>());
+                mSpotifyTracks);
 
         View rootView = inflater.inflate(R.layout.fragment_top_ten_tracks, container, false);
 
@@ -61,15 +71,19 @@ public class TopTenTracksActivityFragment extends Fragment {
         return rootView;
     }
 
-    private void fetchTopTenTracks(String artistID) {
-        FetchTopTenTracksTask task = new FetchTopTenTracksTask();
-        task.execute(artistID);
+    private void fetchTopTenTracks(String searchArgument) {
+        if (!searchArgument.equals(this.mSearchArgument)) {
+            this.mSearchArgument = searchArgument;
+
+            FetchTopTenTracksTask task = new FetchTopTenTracksTask();
+            task.execute(searchArgument);
+        }
     }
 
     public class FetchTopTenTracksTask extends AsyncTask<String, Void, ArrayList<Track>> {
         @Override
         protected ArrayList<Track> doInBackground(String... params) {
-            ArrayList<Track> spotifyTracks = null;
+            mSpotifyTracks = new ArrayList<Track>();
 
             Map<String, Object> queryMap = new HashMap<>();
             queryMap.put("country", "US");
@@ -77,21 +91,18 @@ public class TopTenTracksActivityFragment extends Fragment {
             try {
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotify = api.getService();
-
                 Tracks tracks = spotify.getArtistTopTrack(params[0], queryMap);
 
-                spotifyTracks = new ArrayList<Track>();
                 for (Track track : tracks.tracks) {
-                    spotifyTracks.add(track);
-
-                    Log.d(LOG_TAG, track.artists.get(0).name + " / " + track.name);
+                    mSpotifyTracks.add(track);
                 }
             }
             catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
+                mSpotifyTracks = null;
             }
 
-            return spotifyTracks;
+            return mSpotifyTracks;
         }
 
         @Override

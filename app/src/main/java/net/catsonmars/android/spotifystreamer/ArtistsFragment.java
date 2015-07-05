@@ -24,7 +24,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 
 /**
- * The code for retaining the fragment state was adopted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
+ * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
  */
 public class ArtistsFragment extends Fragment {
     String LOG_TAG = "";
@@ -88,12 +88,13 @@ public class ArtistsFragment extends Fragment {
     }
 
     /*
-    Compare the saved search argument and the current search argument;
-    Do the search only if the arguments don't match
-
-    The deletion of the last character in the search box doesn't trigger the search because of the second 'if'.
-    I didn't intend to implement this behaviour but I like it better than blanking the list view when the user deletes the last character.
-     */
+    * Compare the saved search argument and the current search argument;
+    * Do the search only if the arguments don't match
+    *
+    * The deletion of the last character in the search box doesn't trigger the search because of the second 'if'.
+    * I didn't intend to implement this behaviour but I like it better than blanking the list view
+    * when the user deletes the last character in the search box.
+    */
     private void updateArtists(String searchArgument) {
         if (!searchArgument.equals(this.mSearchArgument)) {
             this.mSearchArgument = searchArgument;

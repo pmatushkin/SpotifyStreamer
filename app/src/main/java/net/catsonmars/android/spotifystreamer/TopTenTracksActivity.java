@@ -2,6 +2,7 @@ package net.catsonmars.android.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -9,15 +10,31 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
+/**
+ * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
+ */
 public class TopTenTracksActivity extends ActionBarActivity {
+
+    private static final String TAG_FRAGMENT = "tracks_fragment";
+
+    private TopTenTracksActivityFragment mTracksFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_ten_tracks);
         setSubTitle();
-    }
 
+        FragmentManager fm = getSupportFragmentManager();
+        mTracksFragment = (TopTenTracksActivityFragment)fm.findFragmentByTag(TAG_FRAGMENT);
+
+        // If the Fragment is non-null, then it is currently being
+        // retained across a configuration change.
+        if (mTracksFragment == null) {
+            mTracksFragment = new TopTenTracksActivityFragment();
+            fm.beginTransaction().add(mTracksFragment, TAG_FRAGMENT).commit();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

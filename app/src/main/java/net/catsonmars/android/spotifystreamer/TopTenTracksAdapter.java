@@ -16,7 +16,8 @@ import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 
 /**
- * Created by pmatushkin on 7/4/2015.
+ * Custom adapter code is adapted from http://www.softwarepassion.com/android-series-custom-listview-items-and-adapters/
+ * Spotify icon is cropped from the Spotify Design Resources package at https://developer.spotify.com/design/
  */
 public class TopTenTracksAdapter extends ArrayAdapter<Track> {
 
@@ -65,6 +66,7 @@ public class TopTenTracksAdapter extends ArrayAdapter<Track> {
                             .into(img);
                 } else {
                     // try to get the medium size image for the list view
+                    // it's usually the second image on the result list
                     Image image;
                     if (o.album.images.size() >= 2)
                         image = o.album.images.get(1);

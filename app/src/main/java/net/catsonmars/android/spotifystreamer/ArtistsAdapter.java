@@ -10,9 +10,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.Image;
 
 /**
  * Custom adapter code is adapted from http://www.softwarepassion.com/android-series-custom-listview-items-and-adapters/
@@ -20,14 +19,12 @@ import kaaes.spotify.webapi.android.models.Artist;
  */
 public class ArtistsAdapter extends ArrayAdapter<Artist> {
 
-    private ArrayList<Artist> items;
     private Context context;
 
-    public ArtistsAdapter(Context context, int resource, int textViewResourceId, ArrayList<Artist> objects) {
-        super(context, resource, textViewResourceId, objects);
+    public ArtistsAdapter(Context context, int resource) {
+        super(context, resource);
 
         this.context = context;
-        this.items = objects;
     }
 
     @Override
@@ -38,7 +35,7 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
             v = vi.inflate(R.layout.list_item_artist, null);
         }
 
-        Artist o = items.get(position);
+        Artist o = getItem(position);
         if (o != null) {
             TextView tt;
             ImageView img;
@@ -58,8 +55,16 @@ public class ArtistsAdapter extends ArrayAdapter<Artist> {
                             .resize(200, 200)
                             .into(img);
                 } else {
+                    // try to get the medium size image for the list view
+                    // it's usually the second image on the result list
+                    Image image;
+                    if (o.images.size() >= 2)
+                        image = o.images.get(1);
+                    else
+                        image = o.images.get(0);
+
                     Picasso.with(context)
-                            .load(o.images.get(0).url)
+                            .load(image.url)
                             .placeholder(R.drawable.img_spotify_default)
                             .error(R.drawable.img_spotify_default)
                             .resize(200, 200)

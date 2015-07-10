@@ -31,6 +31,8 @@ public class ArtistsFragment extends Fragment {
 
     private ArtistsAdapter mArtistsAdapter;
     private String mSearchArgument;
+
+    // The list to retain the previous search results across configuration changes
     private ArrayList<Artist> mSpotifyArtists;
 
     @Override
@@ -51,9 +53,7 @@ public class ArtistsFragment extends Fragment {
 
         mArtistsAdapter = new ArtistsAdapter(
                 getActivity(),
-                R.layout.list_item_artist,
-                R.id.txtArtistName,
-                mSpotifyArtists);
+                R.layout.list_item_artist);
 
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
 
@@ -72,6 +72,8 @@ public class ArtistsFragment extends Fragment {
             }
         });
 
+        /* TODO: redo this for SearchView and a higher API level (see http://pastebin.com/BRGEujnU for details)
+         */
         EditText edtArtist = (EditText)rootView.findViewById(R.id.edtArtist);
         edtArtist.addTextChangedListener(new TextWatcher() {
             @Override
@@ -96,7 +98,10 @@ public class ArtistsFragment extends Fragment {
     * when the user deletes the last character in the search box.
     */
     private void updateArtists(String searchArgument) {
-        if (!searchArgument.equals(this.mSearchArgument)) {
+        if (searchArgument.equals(this.mSearchArgument)) {
+            mArtistsAdapter.clear();
+            mArtistsAdapter.addAll(mSpotifyArtists);
+        } else {
             this.mSearchArgument = searchArgument;
 
             if (!searchArgument.isEmpty()) {
@@ -109,23 +114,23 @@ public class ArtistsFragment extends Fragment {
     public class FetchArtistsTask extends AsyncTask<String, Void, ArrayList<Artist>> {
         @Override
         protected ArrayList<Artist> doInBackground(String... params) {
-            mSpotifyArtists = new ArrayList<Artist>();
+            ArrayList<Artist> spotifyArtists = new ArrayList<Artist>();
 
             try {
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotify = api.getService();
+
+                Log.d(LOG_TAG, "searching for an artist on Spotify");
                 ArtistsPager artists = spotify.searchArtists(params[0]);
 
-                for (Artist artist : artists.artists.items) {
-                    mSpotifyArtists.add(artist);
-                }
+                spotifyArtists.addAll(artists.artists.items);
             }
             catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
-                mSpotifyArtists = null;
+                spotifyArtists = null;
             }
 
-            return mSpotifyArtists;
+            return spotifyArtists;
         }
 
         @Override
@@ -134,11 +139,11 @@ public class ArtistsFragment extends Fragment {
                 Toast toast = Toast.makeText(getActivity(), getString(R.string.error_search_artists), Toast.LENGTH_SHORT);
                 toast.show();
             } else {
-                mArtistsAdapter.clear();
+                mSpotifyArtists.clear();
+                mSpotifyArtists.addAll(artists);
 
-                for (Artist artist : artists) {
-                    mArtistsAdapter.add(artist);
-                }
+                mArtistsAdapter.clear();
+                mArtistsAdapter.addAll(artists);
 
                 if (mArtistsAdapter.isEmpty()) {
                     Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_artists), Toast.LENGTH_SHORT);

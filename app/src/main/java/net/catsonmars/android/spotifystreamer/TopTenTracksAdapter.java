@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 
@@ -21,14 +19,12 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TopTenTracksAdapter extends ArrayAdapter<Track> {
 
-    private ArrayList<Track> items;
     private Context context;
 
-    public TopTenTracksAdapter(Context context, int resource, int textViewResourceId, ArrayList<Track> objects) {
-        super(context, resource, textViewResourceId, objects);
+    public TopTenTracksAdapter(Context context, int resource) {
+        super(context, resource);
 
         this.context = context;
-        this.items = objects;
     }
 
     @Override
@@ -39,7 +35,7 @@ public class TopTenTracksAdapter extends ArrayAdapter<Track> {
             v = vi.inflate(R.layout.list_item_track, null);
         }
 
-        Track o = items.get(position);
+        Track o = getItem(position);
         if (o != null) {
             TextView tt;
             ImageView img;

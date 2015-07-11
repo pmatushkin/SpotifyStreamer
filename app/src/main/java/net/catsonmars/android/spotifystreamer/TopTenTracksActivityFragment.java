@@ -25,10 +25,12 @@ import kaaes.spotify.webapi.android.models.Tracks;
  * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
  */
 public class TopTenTracksActivityFragment extends Fragment {
-
     String LOG_TAG = "";
+
     TopTenTracksAdapter mTracksAdapter;
     private String mSearchArgument;
+
+    // The list to retain the previous search results across configuration changes
     ArrayList<Track> mSpotifyTracks;
 
     @Override
@@ -49,9 +51,7 @@ public class TopTenTracksActivityFragment extends Fragment {
 
         mTracksAdapter = new TopTenTracksAdapter(
                 getActivity(),
-                R.layout.list_item_track,
-                R.id.txtTrackName,
-                mSpotifyTracks);
+                R.layout.list_item_track);
 
         View rootView = inflater.inflate(R.layout.fragment_top_ten_tracks, container, false);
 
@@ -72,7 +72,10 @@ public class TopTenTracksActivityFragment extends Fragment {
     }
 
     private void fetchTopTenTracks(String searchArgument) {
-        if (!searchArgument.equals(this.mSearchArgument)) {
+        if (searchArgument.equals(this.mSearchArgument)) {
+            mTracksAdapter.clear();
+            mTracksAdapter.addAll(mSpotifyTracks);
+        } else {
             this.mSearchArgument = searchArgument;
 
             FetchTopTenTracksTask task = new FetchTopTenTracksTask();
@@ -83,7 +86,7 @@ public class TopTenTracksActivityFragment extends Fragment {
     public class FetchTopTenTracksTask extends AsyncTask<String, Void, ArrayList<Track>> {
         @Override
         protected ArrayList<Track> doInBackground(String... params) {
-            mSpotifyTracks = new ArrayList<Track>();
+            ArrayList<Track> spotifyTracks = new ArrayList<Track>();
 
             Map<String, Object> queryMap = new HashMap<>();
             queryMap.put("country", "US");
@@ -91,18 +94,18 @@ public class TopTenTracksActivityFragment extends Fragment {
             try {
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotify = api.getService();
+
+                Log.d(LOG_TAG, "searching for the top 10 tracks on Spotify");
                 Tracks tracks = spotify.getArtistTopTrack(params[0], queryMap);
 
-                for (Track track : tracks.tracks) {
-                    mSpotifyTracks.add(track);
-                }
+                spotifyTracks.addAll(tracks.tracks);
             }
             catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
-                mSpotifyTracks = null;
+                spotifyTracks = null;
             }
 
-            return mSpotifyTracks;
+            return spotifyTracks;
         }
 
         @Override
@@ -111,11 +114,11 @@ public class TopTenTracksActivityFragment extends Fragment {
                 Toast toast = Toast.makeText(getActivity(), getString(R.string.error_search_top_tracks), Toast.LENGTH_SHORT);
                 toast.show();
             } else {
-                mTracksAdapter.clear();
+                mSpotifyTracks.clear();
+                mSpotifyTracks.addAll(tracks);
 
-                for (Track track : tracks) {
-                    mTracksAdapter.add(track);
-                }
+                mTracksAdapter.clear();
+                mTracksAdapter.addAll(tracks);
 
                 if (mTracksAdapter.isEmpty()) {
                     Toast toast = Toast.makeText(getActivity(), getString(R.string.warn_empty_search_top_tracks), Toast.LENGTH_SHORT);

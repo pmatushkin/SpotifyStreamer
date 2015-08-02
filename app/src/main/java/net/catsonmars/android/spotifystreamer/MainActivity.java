@@ -3,6 +3,7 @@ package net.catsonmars.android.spotifystreamer;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -12,14 +13,33 @@ import android.view.MenuItem;
  */
 public class MainActivity extends ActionBarActivity {
 
+    private final String LOG_TAG = "SPOTIFY_STREAMER";
     private static final String TAG_FRAGMENT = "artists_fragment";
+    private final String TRACKSFRAGMENT_TAG = "TFTAG";
 
     private ArtistsFragment mArtistsFragment;
+    private boolean mTwoPanes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (null == findViewById(R.id.fragment_tracks_container)) {
+            Log.d(LOG_TAG, "initializing phone UI");
+
+            mTwoPanes = false;
+        } else {
+            Log.d(LOG_TAG, "initializing tablet UI");
+
+            mTwoPanes = true;
+
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.fragment_tracks_container, new TopTenTracksActivityFragment(), TRACKSFRAGMENT_TAG)
+                        .commit();
+            }
+        }
 
         FragmentManager fm = getSupportFragmentManager();
         mArtistsFragment = (ArtistsFragment)fm.findFragmentByTag(TAG_FRAGMENT);

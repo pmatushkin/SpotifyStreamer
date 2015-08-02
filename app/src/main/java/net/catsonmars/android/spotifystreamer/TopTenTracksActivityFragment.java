@@ -25,7 +25,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
  * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
  */
 public class TopTenTracksActivityFragment extends Fragment {
-    String LOG_TAG = "";
+    String LOG_TAG = "SPOTIFY_STREAMER";
 
     TopTenTracksAdapter mTracksAdapter;
     private String mSearchArgument;

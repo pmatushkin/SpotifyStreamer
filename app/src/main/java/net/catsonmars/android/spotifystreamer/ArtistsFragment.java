@@ -27,7 +27,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
  */
 public class ArtistsFragment extends Fragment {
-    String LOG_TAG = "";
+    String LOG_TAG = "SPOTIFY_STREAMER";
 
     private ArtistsAdapter mArtistsAdapter;
     private String mSearchArgument;
@@ -46,8 +46,6 @@ public class ArtistsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        LOG_TAG = getString(R.string.app_log_tag);
-
         if (mSpotifyArtists == null)
             mSpotifyArtists = new ArrayList<Artist>();
 

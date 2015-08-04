@@ -2,10 +2,10 @@ package net.catsonmars.android.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,31 +15,64 @@ import android.view.MenuItem;
  */
 public class TopTenTracksActivity extends ActionBarActivity {
 
+    private final String TAG_LOG = "SPOTIFY_STREAMER";
     private static final String TAG_FRAGMENT = "tracks_fragment";
+    private static final String TAG_TRACKSFRAGMENT = "TFTAG";
+    private static final String KEY_SUBTITLE = "KEY_SUBTITLE";
 
-    private TopTenTracksActivityFragment mTracksFragment;
+    //private TopTenTracksActivityFragment mTracksFragment;
+    private String mSubTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG_LOG, "In TopTenTracksActivity.onCreate");
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_top_ten_tracks);
-        setSubTitle();
 
-        FragmentManager fm = getSupportFragmentManager();
-        mTracksFragment = (TopTenTracksActivityFragment)fm.findFragmentByTag(TAG_FRAGMENT);
+        if (null == savedInstanceState) {
+            Intent intent = getIntent();
 
-        // If the Fragment is non-null, then it is currently being
-        // retained across a configuration change.
-        if (mTracksFragment == null) {
-            mTracksFragment = new TopTenTracksActivityFragment();
-            fm.beginTransaction().add(mTracksFragment, TAG_FRAGMENT).commit();
+            Bundle args = new Bundle();
+            args.putString("artist_id", intent.getStringExtra(Intent.EXTRA_TEXT));
+
+            mSubTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
+
+            TopTenTracksActivityFragment f = new TopTenTracksActivityFragment();
+            f.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_tracks_container, f, TAG_TRACKSFRAGMENT)
+                    .commit();
+        } else {
+            if (savedInstanceState.containsKey(KEY_SUBTITLE)) {
+                mSubTitle = savedInstanceState.getString(KEY_SUBTITLE);
+            } else {
+                mSubTitle = "";
+            }
         }
+
+        setSubTitle(mSubTitle);
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        Log.d(TAG_LOG, "In TopTenTracksActivity.onSaveInstanceState");
+
+        savedInstanceState.putString(KEY_SUBTITLE, mSubTitle);
+
+        super.onPause();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_top_ten_tracks, menu);
+
         return true;
     }
 
@@ -72,18 +105,10 @@ public class TopTenTracksActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setSubTitle() {
-        String extra = Intent.EXTRA_TITLE;
+    private void setSubTitle(String subTitle) {
+        ActionBar ab = getSupportActionBar();
 
-        String subTitle = "";
-        Intent intent = getIntent();
-        if ((intent != null) && intent.hasExtra(extra)) {
-            subTitle = intent.getStringExtra(extra);
-
-            if (!subTitle.isEmpty()) {
-                ActionBar ab = getSupportActionBar();
-                ab.setSubtitle(subTitle);
-            }
-        }
+        if (null != ab)
+            ab.setSubtitle(subTitle);
     }
 }

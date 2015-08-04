@@ -1,6 +1,5 @@
 package net.catsonmars.android.spotifystreamer;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -31,9 +30,17 @@ public class ArtistsFragment extends Fragment {
 
     private ArtistsAdapter mArtistsAdapter;
     private String mSearchArgument;
+    private int mArtistPosition = -1;
 
     // The list to retain the previous search results across configuration changes
     private ArrayList<Artist> mSpotifyArtists;
+
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(Artist artist);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,8 +53,8 @@ public class ArtistsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (mSpotifyArtists == null)
-            mSpotifyArtists = new ArrayList<Artist>();
+        if (null == mSpotifyArtists)
+            mSpotifyArtists = new ArrayList<>();
 
         mArtistsAdapter = new ArtistsAdapter(
                 getActivity(),
@@ -61,12 +68,11 @@ public class ArtistsFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Artist artist = (Artist) parent.getAdapter().getItem(position);
+                // Save the position of the currently selected artist
+                mArtistPosition = position;
 
-                Intent detailIntent = new Intent(getActivity(), TopTenTracksActivity.class);
-                detailIntent.putExtra(Intent.EXTRA_TEXT, artist.id);
-                detailIntent.putExtra(Intent.EXTRA_TITLE, artist.name);
-                startActivity(detailIntent);
+                Artist artist = (Artist) parent.getAdapter().getItem(position);
+                ((Callback) getActivity()).onItemSelected(artist);
             }
         });
 
@@ -133,7 +139,7 @@ public class ArtistsFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArrayList<Artist> artists) {
-            if (artists == null) {
+            if (null == artists) {
                 Toast toast = Toast.makeText(getActivity(), getString(R.string.error_search_artists), Toast.LENGTH_SHORT);
                 toast.show();
             } else {

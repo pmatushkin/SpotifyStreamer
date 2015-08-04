@@ -1,6 +1,5 @@
 package net.catsonmars.android.spotifystreamer;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,7 +24,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
  * The code for retaining the fragment state is adapted from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
  */
 public class TopTenTracksActivityFragment extends Fragment {
-    String LOG_TAG = "SPOTIFY_STREAMER";
+    private static final String TAG_LOG = "SPOTIFY_STREAMER";
 
     TopTenTracksAdapter mTracksAdapter;
     private String mSearchArgument;
@@ -35,6 +34,8 @@ public class TopTenTracksActivityFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreate");
+
         super.onCreate(savedInstanceState);
 
         // Retain this fragment across configuration changes.
@@ -44,10 +45,10 @@ public class TopTenTracksActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        LOG_TAG = getString(R.string.app_log_tag);
+        Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreateView");
 
         if (mSpotifyTracks == null)
-            mSpotifyTracks = new ArrayList<Track>();
+            mSpotifyTracks = new ArrayList<>();
 
         mTracksAdapter = new TopTenTracksAdapter(
                 getActivity(),
@@ -58,12 +59,14 @@ public class TopTenTracksActivityFragment extends Fragment {
         ListView listView = (ListView)rootView.findViewById(R.id.lvTracks);
         listView.setAdapter(mTracksAdapter);
 
-        String extra = Intent.EXTRA_TEXT;
-
         String artistID = "";
-        Intent intent = getActivity().getIntent();
-        if ((intent != null) && intent.hasExtra(extra)) {
-            artistID = intent.getStringExtra(extra);
+        Bundle args = getArguments();
+        if (null == args) {
+            Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreateView... NOT found arguments");
+        } else {
+            Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreateView... found arguments");
+
+            artistID = args.getString("artist_id");
         }
 
         fetchTopTenTracks(artistID);
@@ -72,14 +75,16 @@ public class TopTenTracksActivityFragment extends Fragment {
     }
 
     private void fetchTopTenTracks(String searchArgument) {
-        if (searchArgument.equals(this.mSearchArgument)) {
-            mTracksAdapter.clear();
-            mTracksAdapter.addAll(mSpotifyTracks);
-        } else {
-            this.mSearchArgument = searchArgument;
+        if (!searchArgument.isEmpty()) {
+            if (searchArgument.equals(this.mSearchArgument)) {
+                mTracksAdapter.clear();
+                mTracksAdapter.addAll(mSpotifyTracks);
+            } else {
+                this.mSearchArgument = searchArgument;
 
-            FetchTopTenTracksTask task = new FetchTopTenTracksTask();
-            task.execute(searchArgument);
+                FetchTopTenTracksTask task = new FetchTopTenTracksTask();
+                task.execute(searchArgument);
+            }
         }
     }
 
@@ -95,13 +100,13 @@ public class TopTenTracksActivityFragment extends Fragment {
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotify = api.getService();
 
-                Log.d(LOG_TAG, "searching for the top 10 tracks on Spotify");
+                Log.d(TAG_LOG, "searching for the top 10 tracks on Spotify");
                 Tracks tracks = spotify.getArtistTopTrack(params[0], queryMap);
 
                 spotifyTracks.addAll(tracks.tracks);
             }
             catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage());
+                Log.e(TAG_LOG, e.getMessage());
                 spotifyTracks = null;
             }
 
@@ -110,7 +115,7 @@ public class TopTenTracksActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArrayList<Track> tracks) {
-            if (tracks == null) {
+            if (null == tracks) {
                 Toast toast = Toast.makeText(getActivity(), getString(R.string.error_search_top_tracks), Toast.LENGTH_SHORT);
                 toast.show();
             } else {

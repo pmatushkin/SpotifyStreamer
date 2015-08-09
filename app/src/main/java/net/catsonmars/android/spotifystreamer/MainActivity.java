@@ -3,6 +3,7 @@ package net.catsonmars.android.spotifystreamer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -62,6 +63,7 @@ public class MainActivity extends ActionBarActivity
             Bundle args = new Bundle();
             args.putString("artist_id", artist.id);
             args.putString("artist_name", artist.name);
+            args.putBoolean("layout_twopane", mTwoPane);
 
             TopTenTracksActivityFragment f = new TopTenTracksActivityFragment();
             f.setArguments(args);
@@ -69,11 +71,14 @@ public class MainActivity extends ActionBarActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_tracks_container, f, TRACKSFRAGMENT_TAG)
                     .commit();
+
+            setSubTitle(artist.name);
         } else {
             // on phone, launch DetailActivity
             Intent intent = new Intent(this, TopTenTracksActivity.class);
             intent.putExtra(Intent.EXTRA_TEXT, artist.id);
             intent.putExtra(Intent.EXTRA_TITLE, artist.name);
+            intent.putExtra("layout_twopane", mTwoPane);
 
             startActivity(intent);
         }
@@ -99,5 +104,12 @@ public class MainActivity extends ActionBarActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setSubTitle(String subTitle) {
+        ActionBar ab = getSupportActionBar();
+
+        if (null != ab)
+            ab.setSubtitle(subTitle);
     }
 }

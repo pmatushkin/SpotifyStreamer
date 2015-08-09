@@ -36,6 +36,7 @@ public class TopTenTracksActivity extends ActionBarActivity {
 
             Bundle args = new Bundle();
             args.putString("artist_id", intent.getStringExtra(Intent.EXTRA_TEXT));
+            args.putBoolean("layout_twopane", intent.getBooleanExtra("layout_twopane", true));
 
             mSubTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
 

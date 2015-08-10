@@ -10,8 +10,11 @@
     <string name="hint_artist_icon">Artist icon</string>
     <string name="hint_search">Search artists</string>
     <string name="hint_track_icon">Track icon</string>
+    <string name="hint_track_art">Track art</string>
 
     <string name="title_activity_top_ten_tracks">Top 10 Tracks</string>
+
+    <string name="label_textview_start_track_length">0:00</string>
 
     <string name="warn_empty_search_artists">Artists not found</string>
     <string name="warn_empty_search_top_tracks">Top tracks not found</string>

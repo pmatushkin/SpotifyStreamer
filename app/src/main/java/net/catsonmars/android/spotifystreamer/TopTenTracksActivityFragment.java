@@ -28,6 +28,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
  */
 public class TopTenTracksActivityFragment extends Fragment {
     private static final String TAG_LOG = "SPOTIFY_STREAMER";
+    private static final String TAG_NOWPLAYING = "NOW PLAYING";
 
     TopTenTracksAdapter mTracksAdapter;
     private String mSearchArgument;
@@ -39,7 +40,7 @@ public class TopTenTracksActivityFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreate");
+        Log.d(TAG_LOG, "TopTenTracksActivityFragment.onCreate");
 
         super.onCreate(savedInstanceState);
 
@@ -50,7 +51,7 @@ public class TopTenTracksActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreateView");
+        Log.d(TAG_LOG, "TopTenTracksActivityFragment.onCreateView");
 
         if (mSpotifyTracks == null)
             mSpotifyTracks = new ArrayList<>();
@@ -67,9 +68,9 @@ public class TopTenTracksActivityFragment extends Fragment {
         mArtistID = "";
         Bundle args = getArguments();
         if (null == args) {
-            Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreateView... NOT found arguments");
+            Log.d(TAG_LOG, "TopTenTracksActivityFragment.onCreateView... NOT found arguments");
         } else {
-            Log.d(TAG_LOG, "in TopTenTracksActivityFragment.onCreateView... found arguments");
+            Log.d(TAG_LOG, "TopTenTracksActivityFragment.onCreateView... found arguments");
 
             mArtistID = args.getString("artist_id");
             mTwoPane = args.getBoolean("layout_twopane");
@@ -83,12 +84,9 @@ public class TopTenTracksActivityFragment extends Fragment {
                 if (mTwoPane) {
                     // Create the fragment and show it as a dialog.
                     DialogFragment newFragment = new NowPlayingFragment();
-//                    newFragment.setShowsDialog(true);
-
-                    newFragment.show(getFragmentManager(), "dialog");
+                    newFragment.show(getFragmentManager(), TAG_NOWPLAYING);
                 } else {
                     DialogFragment newFragment = new NowPlayingFragment();
-//                    newFragment.setShowsDialog(false);
 
                     // The device is smaller, so show the fragment fullscreen
                     FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -96,16 +94,9 @@ public class TopTenTracksActivityFragment extends Fragment {
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     // To make it fullscreen, use the 'content' root view as the container
                     // for the fragment, which is always the root view for the activity
-                    transaction.add(android.R.id.content, newFragment)
+                    transaction.add(android.R.id.content, newFragment, TAG_NOWPLAYING)
                             .addToBackStack(null)
                             .commit();
-
-//                    Intent intent = new Intent(getActivity(), TopTenTracksActivity.class);
-//                    intent.putExtra(Intent.EXTRA_TEXT, mArtistID);
-//                    intent.putExtra(Intent.EXTRA_TITLE, mArtistID);
-//                    intent.putExtra("layout_twopane", mTwoPane);
-//
-//                    startActivity(intent);
                 }
             }
         });

@@ -25,7 +25,7 @@ public class TopTenTracksActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG_LOG, "In TopTenTracksActivity.onCreate");
+        Log.d(TAG_LOG, "TopTenTracksActivity.onCreate");
 
         super.onCreate(savedInstanceState);
 
@@ -62,7 +62,7 @@ public class TopTenTracksActivity extends ActionBarActivity {
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 
-        Log.d(TAG_LOG, "In TopTenTracksActivity.onSaveInstanceState");
+        Log.d(TAG_LOG, "TopTenTracksActivity.onSaveInstanceState");
 
         savedInstanceState.putString(KEY_SUBTITLE, mSubTitle);
 

@@ -35,12 +35,16 @@ public class TopTenTracksActivityFragment extends Fragment {
     private String mArtistID;
     private Boolean mTwoPane;
 
+    private int mSelectedItemPosition;
+
     // The list to retain the previous search results across configuration changes
     ArrayList<Track> mSpotifyTracks;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG_LOG, "TopTenTracksActivityFragment.onCreate");
+
+        mSelectedItemPosition = -1;
 
         super.onCreate(savedInstanceState);
 
@@ -81,14 +85,16 @@ public class TopTenTracksActivityFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mSelectedItemPosition = position;
+
                 if (mTwoPane) {
-                    // Create the fragment and show it as a dialog.
+                    // Tablet UI: create the fragment and show it as a dialog.
                     DialogFragment newFragment = new NowPlayingFragment();
                     newFragment.show(getFragmentManager(), TAG_NOWPLAYING);
                 } else {
                     DialogFragment newFragment = new NowPlayingFragment();
 
-                    // The device is smaller, so show the fragment fullscreen
+                    // Phone UI: the device is smaller, so show the fragment fullscreen
                     FragmentTransaction transaction = getFragmentManager().beginTransaction();
                     // For a little polish, specify a transition animation
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -102,6 +108,20 @@ public class TopTenTracksActivityFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    public int getSelectedItemPosition() {
+        return mSelectedItemPosition;
+    }
+
+    public Boolean setSelectedItemPosition(int newPosition) {
+        try {
+            mSelectedItemPosition = newPosition;
+
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
     }
 
     private void fetchTopTenTracks(String searchArgument) {

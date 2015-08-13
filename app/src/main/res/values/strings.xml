@@ -18,6 +18,9 @@
 
     <string name="warn_empty_search_artists">Artists not found</string>
     <string name="warn_empty_search_top_tracks">Top tracks not found</string>
+    <string name="warn_empty_current_track">Current track not found</string>
+    <string name="warn_no_next_track">This is the last track in the queue</string>
+    <string name="warn_no_previous_track">This is the first track in the queue</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment 2</string>

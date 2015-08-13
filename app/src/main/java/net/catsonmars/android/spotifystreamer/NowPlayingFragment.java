@@ -1,6 +1,8 @@
 package net.catsonmars.android.spotifystreamer;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -9,11 +11,36 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class NowPlayingFragment extends DialogFragment {
+import com.squareup.picasso.Picasso;
+
+import kaaes.spotify.webapi.android.models.Image;
+import kaaes.spotify.webapi.android.models.Track;
+
+public class NowPlayingFragment extends DialogFragment
+        implements View.OnClickListener {
     private static final String TAG_LOG = "SPOTIFY_STREAMER";
 
-    private static MediaPlayerService mediaPlayerService;
+    private static MediaPlayerService mMediaPlayerService;
+
+    private TopTenTracksCallback mTopTenTracks;
+
+    private Track mCurrentTrack;
+
+    View rootView;
+
+    public interface TopTenTracksCallback {
+        Activity getActivity();
+
+        Track getCurrentTrack();
+        //Track getNextTrack();
+        //Track getPreviousTrack();
+        Boolean moveToPreviousTrack();
+        Boolean moveToNextTrack();
+    }
 
     /**
      * The system calls this only when creating the layout in a dialog.
@@ -41,20 +68,43 @@ public class NowPlayingFragment extends DialogFragment {
                              Bundle savedInstanceState) {
         Log.d(TAG_LOG, "NowPlayingFragment.onCreateView");
 
-        if (null == mediaPlayerService) {
+        if (null == mMediaPlayerService) {
             Log.d(TAG_LOG, "Initializing media player in onCreateView...");
-            mediaPlayerService = new MediaPlayerService();
+            mMediaPlayerService = new MediaPlayerService();
         } else {
             Log.d(TAG_LOG, "Media player is already initialized");
         }
 
         // Inflate the layout to use as dialog or embedded fragment
-        View rootView = inflater.inflate(R.layout.fragment_now_playing, container, false);
+        rootView = inflater.inflate(R.layout.fragment_now_playing, container, false);
 
+        mCurrentTrack = mTopTenTracks.getCurrentTrack();
+        if (null == mCurrentTrack) {
+            Log.d(TAG_LOG, "Current track: NULL");
+        } else {
+            Log.d(TAG_LOG, "Current track: " + mCurrentTrack.name);
+        }
 
-//        playButton.setOnClickListener(this);
-//        nextButton.setOnClickListener(this);
-//        previousButton.setOnClickListener(this);
+        loadCurrentTrack();
+
+        View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
+        if (null == viewPlayPause) {
+            Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
+        } else {
+            viewPlayPause.setOnClickListener(this);
+        }
+        View viewPreviousTrack = rootView.findViewById(R.id.btnPreviousTrack);
+        if (null == viewPreviousTrack) {
+            Log.e(TAG_LOG, "Previous button not found; check the Now Playing layout");
+        } else {
+            viewPreviousTrack.setOnClickListener(this);
+        }
+        View viewNextTrack = rootView.findViewById(R.id.btnNextTrack);
+        if (null == viewNextTrack) {
+            Log.e(TAG_LOG, "Next button not found; check the Now Playing layout");
+        } else {
+            viewNextTrack.setOnClickListener(this);
+        }
 
         if (null == savedInstanceState) {
 //            trackToPlayList = getArguments().getParcelableArrayList(TRACK_INFO_KEY);
@@ -89,6 +139,107 @@ public class NowPlayingFragment extends DialogFragment {
 //        });
 
         return rootView;
+    }
+
+    private void loadCurrentTrack() {
+        Context context = mTopTenTracks.getActivity();
+        View v = rootView;
+
+        if (null == mCurrentTrack) {
+            Toast toast = Toast.makeText(context, getString(R.string.warn_empty_current_track), Toast.LENGTH_SHORT);
+            toast.show();
+        } else {
+            TextView tt;
+            ImageView img;
+
+            tt = (TextView) v.findViewById(R.id.txtTrackName);
+            if (null == tt) {
+            } else {
+                tt.setText(mCurrentTrack.name);
+            }
+
+            tt = (TextView) v.findViewById(R.id.txtAlbumName);
+            if (null == tt) {
+            } else {
+                tt.setText(mCurrentTrack.album.name);
+            }
+
+            tt = (TextView) v.findViewById(R.id.txtArtistName);
+            if (null == tt) {
+            } else {
+                if ((null == mCurrentTrack.artists) || mCurrentTrack.artists.isEmpty()) {
+                    tt.setText("");
+                } else {
+                    tt.setText(mCurrentTrack.artists.get(0).name);
+                }
+            }
+
+            img = (ImageView) v.findViewById(R.id.imgTrackArt);
+            if (null == img) {
+            } else {
+                if (null == mCurrentTrack.album.images || mCurrentTrack.album.images.isEmpty()) {
+                    Picasso.with(context)
+                            .load(R.drawable.img_spotify_default)
+                            .resize(500, 500)
+                            .into(img);
+                } else {
+                    // try to get the large size image for the list view
+                    // it's usually the first image on the result list
+                    Image image = mCurrentTrack.album.images.get(0);
+
+                    Picasso.with(context)
+                            .load(image.url)
+                            .placeholder(R.drawable.img_spotify_default)
+                            .error(R.drawable.img_spotify_default)
+                            .resize(500, 500)
+                            .into(img);
+                }
+            }
+
+            View viewPlayPause = v.findViewById(R.id.btnPlayPause);
+            onClick(viewPlayPause);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btnPreviousTrack:
+                onPreviousTrack();
+                break;
+            case R.id.btnPlayPause:
+                playPause(v);
+                break;
+            case R.id.btnNextTrack:
+                onNextTrack();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void playPause(View v) {
+        Log.d(TAG_LOG, "NowPlayingFragment.playPause");
+    }
+
+    private void onPreviousTrack() {
+        if (mTopTenTracks.moveToPreviousTrack()) {
+            mCurrentTrack = mTopTenTracks.getCurrentTrack();
+            loadCurrentTrack();
+        } else {
+            Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_no_previous_track), Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+
+    private void onNextTrack() {
+        if (mTopTenTracks.moveToNextTrack()) {
+            mCurrentTrack = mTopTenTracks.getCurrentTrack();
+            loadCurrentTrack();
+        } else {
+            Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_no_next_track), Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     @Override
@@ -156,7 +307,7 @@ public class NowPlayingFragment extends DialogFragment {
         super.onDestroy();
 
         Log.d(TAG_LOG, "Stopping media player in onDestroy...");
-        mediaPlayerService = null;
+        mMediaPlayerService = null;
     }
 
     @Override
@@ -170,5 +321,28 @@ public class NowPlayingFragment extends DialogFragment {
             getDialog().setDismissMessage(null);
 
         super.onDestroyView();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        Log.d(TAG_LOG, "NowPlayingFragment.onAttach");
+        if (null == activity) {
+            Log.d(TAG_LOG, "activity is NULL");
+        } else {
+            Log.d(TAG_LOG, "activity is NOT NULL... can attach");
+        }
+
+        mTopTenTracks = (TopTenTracksCallback)activity;
+
+        super.onAttach(activity);
+    }
+
+    @Override
+    public void onDetach() {
+        Log.d(TAG_LOG, "NowPlayingFragment.onDetach");
+
+        mTopTenTracks = null;
+
+        super.onDetach();
     }
 }

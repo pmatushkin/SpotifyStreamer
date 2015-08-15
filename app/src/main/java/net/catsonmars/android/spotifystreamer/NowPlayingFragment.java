@@ -16,10 +16,13 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+
+import java.util.concurrent.TimeUnit;
 
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
@@ -35,6 +38,8 @@ public class NowPlayingFragment extends DialogFragment
     private TopTenTracksCallback mTopTenTracks;
 
     private Track mCurrentTrack;
+    private int mTrackDuration;
+    private int mTrackProgress;
 
     View rootView;
 
@@ -126,6 +131,26 @@ public class NowPlayingFragment extends DialogFragment
 
         }
 
+        SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    Log.d(TAG_LOG, "Progress: " + progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
 //        scrubBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 //            @Override
 //            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -208,6 +233,8 @@ public class NowPlayingFragment extends DialogFragment
                 }
             }
 
+            displayTrackDurationAndProgress();
+
             if (startPlayback) {
                 View viewPlayPause = v.findViewById(R.id.btnPlayPause);
                 onClick(viewPlayPause);
@@ -284,6 +311,9 @@ public class NowPlayingFragment extends DialogFragment
         super.onCreate(savedInstanceState);
 
         this.setRetainInstance(true);
+
+        mTrackDuration = 0;
+        mTrackProgress = 0;
     }
 
     @Override
@@ -398,6 +428,11 @@ public class NowPlayingFragment extends DialogFragment
 
                     break;
                 }
+                case MediaPlayerService.ACTION_TRACK_SET_DURATION : {
+                    setTrackDuration(intent);
+
+                    break;
+                }
                 default : {
                     Log.d(TAG_LOG, "Unknown callback action: " + intent.getAction());
 
@@ -408,6 +443,43 @@ public class NowPlayingFragment extends DialogFragment
             Log.d(TAG_LOG, "Unknown callback object: " + intent.getAction());
         }
         Toast.makeText(mTopTenTracks.getActivity(), "OnPrepared received", Toast.LENGTH_SHORT).show();
+    }
+
+    private void setTrackDuration(Intent intent) {
+        if (intent.hasExtra(MediaPlayerService.TRACK_DURATION)) {
+            mTrackDuration = intent.getIntExtra(MediaPlayerService.TRACK_DURATION, 0);
+            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)mTrackDuration));
+//            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)3601230));
+//            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)45000));
+
+            displayTrackDurationAndProgress();
+        }
+    }
+
+    private void displayTrackDurationAndProgress() {
+        TextView tt = (TextView) rootView.findViewById(R.id.txtTrackLengthEnd);
+        if (null == tt) {
+        } else {
+            tt.setText(getFormattedDuration((long)mTrackDuration));
+        }
+
+        SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
+        sb.setMax(mTrackDuration);
+        sb.setProgress(mTrackProgress);
+    }
+
+    private String getFormattedDuration(long millis) {
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        millis = millis - hours * 60 * 60 * 1000;
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis = millis - minutes * 60 * 1000;
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+        if (0 == hours) {
+            return String.format("%d:%02d", minutes, seconds);
+        } else {
+            return String.format("%d.%02d:%02d", hours, minutes, seconds);
+        }
     }
 
     private void onTrackPrepared(Intent intent) {

@@ -29,15 +29,16 @@ public class MediaPlayerService extends Service
     public static final String ACTION_TRACK_PLAYED = "ACTION_TRACK_PLAYED";
     public static final String ACTION_TRACK_PAUSED = "ACTION_TRACK_PAUSED";
     public static final String ACTION_TRACK_STOPPED = "ACTION_TRACK_STOPPED";
-    public static final String ACTION_TRACK_LENGTH = "ACTION_TRACK_LENGTH";
+    public static final String ACTION_TRACK_SET_DURATION = "ACTION_TRACK_SET_DURATION";
 
     // internal action strings
     static final String ACTION_PLAYPAUSE = "ACTION_PLAYPAUSE";
     static final String ACTION_STOP = "ACTION_STOP";
 
-    // internal object keys
+    // internal and external object keys
     private static final String TRACK_URL = "TRACK_URL";
-    private static final String TRACK_PROGRESS = "TRACK_PROGRESS";
+    public static final String TRACK_DURATION = "TRACK_DURATION";
+    public static final String TRACK_PROGRESS = "TRACK_PROGRESS";
 
     private String mTrackUrl;
     private MediaPlayer mMediaPlayer;
@@ -175,11 +176,11 @@ public class MediaPlayerService extends Service
         context.startService(intent);
     }
 
-    public static void stopService(Context context) {
-        Intent intent = new Intent(context, MediaPlayerService.class);
-
-        context.stopService(intent);
-    }
+//    public static void stopService(Context context) {
+//        Intent intent = new Intent(context, MediaPlayerService.class);
+//
+//        context.stopService(intent);
+//    }
 
     private void playPause(String trackUrl) {
         // return if the media service is already preparing a playback
@@ -289,6 +290,11 @@ public class MediaPlayerService extends Service
 
         Intent intent = new Intent(CALLBACK_MEDIASERVICE);
         intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_PLAYED);
+        sendBroadcast(intent);
+
+        intent = new Intent(CALLBACK_MEDIASERVICE);
+        intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_SET_DURATION);
+        intent.putExtra(TRACK_DURATION, mMediaPlayer.getDuration());
         sendBroadcast(intent);
 
 //        mBroadcastTrackProgressTask = new BroadcastTrackProgressTask();

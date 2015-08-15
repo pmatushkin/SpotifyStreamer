@@ -2,8 +2,11 @@ package net.catsonmars.android.spotifystreamer;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -11,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,7 +28,9 @@ public class NowPlayingFragment extends DialogFragment
         implements View.OnClickListener {
     private static final String TAG_LOG = "SPOTIFY_STREAMER";
 
-    private static MediaPlayerService mMediaPlayerService;
+    private static final String STATE_SAVED = "STATE_SAVED";
+
+//    private static MediaPlayerService mMediaPlayerService;
 
     private TopTenTracksCallback mTopTenTracks;
 
@@ -68,12 +74,12 @@ public class NowPlayingFragment extends DialogFragment
                              Bundle savedInstanceState) {
         Log.d(TAG_LOG, "NowPlayingFragment.onCreateView");
 
-        if (null == mMediaPlayerService) {
-            Log.d(TAG_LOG, "Initializing media player in onCreateView...");
-            mMediaPlayerService = new MediaPlayerService();
-        } else {
-            Log.d(TAG_LOG, "Media player is already initialized");
-        }
+//        if (null == mMediaPlayerService) {
+//            Log.d(TAG_LOG, "Initializing media player in onCreateView...");
+//            mMediaPlayerService = new MediaPlayerService();
+//        } else {
+//            Log.d(TAG_LOG, "Media player is already initialized");
+//        }
 
         // Inflate the layout to use as dialog or embedded fragment
         rootView = inflater.inflate(R.layout.fragment_now_playing, container, false);
@@ -85,7 +91,9 @@ public class NowPlayingFragment extends DialogFragment
             Log.d(TAG_LOG, "Current track: " + mCurrentTrack.name);
         }
 
-        loadCurrentTrack();
+        Boolean startPlayback = null == savedInstanceState
+                || !savedInstanceState.containsKey(STATE_SAVED);
+        loadCurrentTrack(startPlayback);
 
         View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
         if (null == viewPlayPause) {
@@ -142,6 +150,10 @@ public class NowPlayingFragment extends DialogFragment
     }
 
     private void loadCurrentTrack() {
+        loadCurrentTrack(true);
+    }
+
+    private void loadCurrentTrack(Boolean startPlayback) {
         Context context = mTopTenTracks.getActivity();
         View v = rootView;
 
@@ -196,8 +208,10 @@ public class NowPlayingFragment extends DialogFragment
                 }
             }
 
-            View viewPlayPause = v.findViewById(R.id.btnPlayPause);
-            onClick(viewPlayPause);
+            if (startPlayback) {
+                View viewPlayPause = v.findViewById(R.id.btnPlayPause);
+                onClick(viewPlayPause);
+            }
         }
     }
 
@@ -220,6 +234,9 @@ public class NowPlayingFragment extends DialogFragment
 
     private void playPause(View v) {
         Log.d(TAG_LOG, "NowPlayingFragment.playPause");
+        Log.d(TAG_LOG, mCurrentTrack.preview_url);
+
+        MediaPlayerService.playPause(mTopTenTracks.getActivity(), mCurrentTrack.preview_url);
     }
 
     private void onPreviousTrack() {
@@ -247,6 +264,9 @@ public class NowPlayingFragment extends DialogFragment
         Log.d(TAG_LOG, "NowPlayingFragment.onStart");
 
         super.onStart();
+
+        IntentFilter filter = new IntentFilter(MediaPlayerService.CALLBACK_MEDIASERVICE);
+        mTopTenTracks.getActivity().registerReceiver(mOnMediaPlayerServiceCallback, filter);
     }
 
     @Override
@@ -254,6 +274,7 @@ public class NowPlayingFragment extends DialogFragment
         Log.d(TAG_LOG, "NowPlayingFragment.onStop");
 
         super.onStop();
+        mTopTenTracks.getActivity().unregisterReceiver(mOnMediaPlayerServiceCallback);
     }
 
     @Override
@@ -298,6 +319,8 @@ public class NowPlayingFragment extends DialogFragment
         Log.d(TAG_LOG, "NowPlayingFragment.onSaveInstanceState");
 
         super.onSaveInstanceState(outState);
+
+        outState.putBoolean(STATE_SAVED, true);
     }
 
     @Override
@@ -307,7 +330,9 @@ public class NowPlayingFragment extends DialogFragment
         super.onDestroy();
 
         Log.d(TAG_LOG, "Stopping media player in onDestroy...");
-        mMediaPlayerService = null;
+        MediaPlayerService.stop(mTopTenTracks.getActivity());
+//        Log.d(TAG_LOG, "Stopping media player service in onDestroy...");
+//        MediaPlayerService.stopService(mTopTenTracks.getActivity());
     }
 
     @Override
@@ -344,5 +369,64 @@ public class NowPlayingFragment extends DialogFragment
         mTopTenTracks = null;
 
         super.onDetach();
+    }
+
+    public BroadcastReceiver mOnMediaPlayerServiceCallback = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleServiceCallback(intent);
+        }
+    };
+
+    private void handleServiceCallback(Intent intent) {
+        if (intent.getAction().equals(MediaPlayerService.CALLBACK_MEDIASERVICE)) {
+            String callbackAction = intent.getStringExtra(MediaPlayerService.CALLBACK_ACTION);
+
+            switch (callbackAction) {
+                case MediaPlayerService.ACTION_TRACK_PLAYED : {
+                    onTrackPrepared(intent);
+
+                    break;
+                }
+                case MediaPlayerService.ACTION_TRACK_PAUSED : {
+                    onTrackPaused(intent);
+
+                    break;
+                }
+                case MediaPlayerService.ACTION_TRACK_STOPPED : {
+                    onTrackPaused(intent);
+
+                    break;
+                }
+                default : {
+                    Log.d(TAG_LOG, "Unknown callback action: " + intent.getAction());
+
+                    break;
+                }
+            }
+        } else {
+            Log.d(TAG_LOG, "Unknown callback object: " + intent.getAction());
+        }
+        Toast.makeText(mTopTenTracks.getActivity(), "OnPrepared received", Toast.LENGTH_SHORT).show();
+    }
+
+    private void onTrackPrepared(Intent intent) {
+        View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
+
+        if (null == viewPlayPause) {
+            Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
+        } else {
+            ((Button)viewPlayPause).setCompoundDrawablesRelativeWithIntrinsicBounds(android.R.drawable.ic_media_pause, 0, 0, 0);
+        }
+    }
+
+    private void onTrackPaused(Intent intent) {
+        View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
+
+        if (null == viewPlayPause) {
+            Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
+        } else {
+            ((Button)viewPlayPause).setCompoundDrawablesRelativeWithIntrinsicBounds(android.R.drawable.ic_media_play, 0, 0, 0);
+        }
     }
 }

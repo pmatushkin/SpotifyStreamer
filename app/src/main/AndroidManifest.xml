@@ -29,6 +29,10 @@
                 android:value="net.catsonmars.android.spotifystreamer.MainActivity" />
         </activity>
 
+        <service
+            android:name="net.catsonmars.android.spotifystreamer.MediaPlayerService">
+        </service>
+
     </application>
 
 </manifest>

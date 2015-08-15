@@ -33,8 +33,6 @@ public class NowPlayingFragment extends DialogFragment
 
     private static final String STATE_SAVED = "STATE_SAVED";
 
-//    private static MediaPlayerService mMediaPlayerService;
-
     private TopTenTracksCallback mTopTenTracks;
 
     private Track mCurrentTrack;
@@ -47,8 +45,6 @@ public class NowPlayingFragment extends DialogFragment
         Activity getActivity();
 
         Track getCurrentTrack();
-        //Track getNextTrack();
-        //Track getPreviousTrack();
         Boolean moveToPreviousTrack();
         Boolean moveToNextTrack();
     }
@@ -78,13 +74,6 @@ public class NowPlayingFragment extends DialogFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG_LOG, "NowPlayingFragment.onCreateView");
-
-//        if (null == mMediaPlayerService) {
-//            Log.d(TAG_LOG, "Initializing media player in onCreateView...");
-//            mMediaPlayerService = new MediaPlayerService();
-//        } else {
-//            Log.d(TAG_LOG, "Media player is already initialized");
-//        }
 
         // Inflate the layout to use as dialog or embedded fragment
         rootView = inflater.inflate(R.layout.fragment_now_playing, container, false);
@@ -119,18 +108,6 @@ public class NowPlayingFragment extends DialogFragment
             viewNextTrack.setOnClickListener(this);
         }
 
-        if (null == savedInstanceState) {
-//            trackToPlayList = getArguments().getParcelableArrayList(TRACK_INFO_KEY);
-//            trackIdx = getArguments().getInt(TRACK_IDX_KEY, -1);
-//
-//            if (trackIdx != -1) {
-//                MediaPlayerService.playTrack(getActivity(), trackIdx);
-//            }
-        } else {
-//            MediaPlayerService.broadcastCurrentTrack(getActivity());
-
-        }
-
         SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
         sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -150,26 +127,6 @@ public class NowPlayingFragment extends DialogFragment
 
             }
         });
-
-//        scrubBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                if (fromUser) {
-//                    MediaPlayerService.setTrackProgressTo(getActivity(), 300 * progress);
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//        });
 
         return rootView;
     }
@@ -233,7 +190,7 @@ public class NowPlayingFragment extends DialogFragment
                 }
             }
 
-            displayTrackDurationAndProgress();
+            displayTrackDuration();
 
             if (startPlayback) {
                 View viewPlayPause = v.findViewById(R.id.btnPlayPause);
@@ -428,8 +385,13 @@ public class NowPlayingFragment extends DialogFragment
 
                     break;
                 }
-                case MediaPlayerService.ACTION_TRACK_SET_DURATION : {
+                case MediaPlayerService.ACTION_TRACK_BROADCAST_DURATION : {
                     setTrackDuration(intent);
+
+                    break;
+                }
+                case MediaPlayerService.ACTION_TRACK_BROADCAST_PROGRESS : {
+                    setTrackProgress(intent);
 
                     break;
                 }
@@ -442,7 +404,7 @@ public class NowPlayingFragment extends DialogFragment
         } else {
             Log.d(TAG_LOG, "Unknown callback object: " + intent.getAction());
         }
-        Toast.makeText(mTopTenTracks.getActivity(), "OnPrepared received", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mTopTenTracks.getActivity(), "OnPrepared received", Toast.LENGTH_SHORT).show();
     }
 
     private void setTrackDuration(Intent intent) {
@@ -452,17 +414,31 @@ public class NowPlayingFragment extends DialogFragment
 //            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)3601230));
 //            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)45000));
 
-            displayTrackDurationAndProgress();
+            displayTrackDuration();
         }
     }
 
-    private void displayTrackDurationAndProgress() {
+    private void setTrackProgress(Intent intent) {
+        if (intent.hasExtra(MediaPlayerService.TRACK_PROGRESS)) {
+            mTrackProgress = intent.getIntExtra(MediaPlayerService.TRACK_PROGRESS, 0);
+            Log.d(TAG_LOG, "Track progress: " + getFormattedDuration((long)mTrackProgress));
+
+            displayTrackProgress();
+        }
+    }
+
+    private void displayTrackDuration() {
         TextView tt = (TextView) rootView.findViewById(R.id.txtTrackLengthEnd);
         if (null == tt) {
         } else {
             tt.setText(getFormattedDuration((long)mTrackDuration));
         }
 
+        SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
+        sb.setMax(mTrackDuration);
+    }
+
+    private void displayTrackProgress() {
         SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
         sb.setMax(mTrackDuration);
         sb.setProgress(mTrackProgress);

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -29,7 +30,8 @@ public class MediaPlayerService extends Service
     public static final String ACTION_TRACK_PLAYED = "ACTION_TRACK_PLAYED";
     public static final String ACTION_TRACK_PAUSED = "ACTION_TRACK_PAUSED";
     public static final String ACTION_TRACK_STOPPED = "ACTION_TRACK_STOPPED";
-    public static final String ACTION_TRACK_SET_DURATION = "ACTION_TRACK_SET_DURATION";
+    public static final String ACTION_TRACK_BROADCAST_DURATION = "ACTION_TRACK_SET_DURATION";
+    public static final String ACTION_TRACK_BROADCAST_PROGRESS = "ACTION_TRACK_BROADCAST_PROGRESS";
 
     // internal action strings
     static final String ACTION_PLAYPAUSE = "ACTION_PLAYPAUSE";
@@ -43,6 +45,7 @@ public class MediaPlayerService extends Service
     private String mTrackUrl;
     private MediaPlayer mMediaPlayer;
     private Boolean mIsPreparing;
+    private BroadcastProgressTask mBroadcastProgressTask;
 
     @Override
     public void onCreate() {
@@ -61,55 +64,6 @@ public class MediaPlayerService extends Service
         return Service.START_NOT_STICKY;
     }
 
-    //    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//
-////        //Set tracks
-////        if (intent.getAction().equals(ACTION_SET_TRACKS)) {
-////            setTracks(intent);
-////        }
-////
-////        //Previous track
-////        if (intent.getAction().equals(ACTION_PLAY_PREVIOUS_TRACK)) {
-////            playPreviousTrack();
-////        }
-//
-//        //Play track
-//        if (intent.getAction().equals(ACTION_PLAY)) {
-//            String trackUrl = intent.getStringExtra(TRACK_URL);
-//            play(trackUrl);
-//        }
-//
-////        //Pause track
-////        if (intent.getAction().equals(ACTION_PAUSE_TRACK)) {
-////            pauseTrack();
-////        }
-////
-////        //Resume track
-////        if (intent.getAction().equals(ACTION_RESUME_TRACK)) {
-////            resumeTrack();
-////        }
-////
-////        //Next track
-////        if (intent.getAction().equals(ACTION_PLAY_NEXT_TRACK)) {
-////            playNextTrack();
-////        }
-////
-////        //Set track progress
-////        if (intent.getAction().equals(ACTION_SET_TRACK_PROGRESS_TO)) {
-////            int progress = intent.getIntExtra(TRACK_PROGRESS, 0);
-////            setTrackProgressTo(progress);
-////        }
-////
-////        //Request current track broadcast
-////        if (intent.getAction().equals(ACTION_BROADCAST_CURRENT_TRACK)) {
-////            if (mCurrentTrack != null)
-////                broadcastTrackToBePlayed();
-////        }
-//
-//        return START_STICKY;
-//    }
-
     @Override
     public void onPrepared(MediaPlayer mp) {
         mIsPreparing = false;
@@ -118,6 +72,7 @@ public class MediaPlayerService extends Service
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+        broadcastMaxProgress();
         stop();
     }
 
@@ -133,33 +88,17 @@ public class MediaPlayerService extends Service
     }
 
     private void handleCommand(Intent intent) {
-//        if (null == intent)
-//            return;
-
         //Play/pause track
         if (intent.getAction().equals(ACTION_PLAYPAUSE)) {
             String trackUrl = intent.getStringExtra(TRACK_URL);
             playPause(trackUrl);
         }
 
-        //Stop media playback
+        //Stop playback
         if (intent.getAction().equals(ACTION_STOP)) {
             stop();
         }
-//
-//        //Pause track
-//        if (intent.getAction().equals(ACTION_PAUSE)) {
-//            pause();
-//        }
     }
-
-//    public static Boolean isPlaying() {
-//        if (mMediaPlayer == null) {
-//            return false;
-//        } else {
-//            return mMediaPlayer.isPlaying();
-//        }
-//    }
 
     public static void playPause(Context context, String trackUrl) {
         Intent intent = new Intent(context, MediaPlayerService.class);
@@ -176,14 +115,12 @@ public class MediaPlayerService extends Service
         context.startService(intent);
     }
 
-//    public static void stopService(Context context) {
-//        Intent intent = new Intent(context, MediaPlayerService.class);
-//
-//        context.stopService(intent);
-//    }
-
     private void playPause(String trackUrl) {
         // return if the media service is already preparing a playback
+        // TODO: here's a problem. if the user quickly clicks Next or Previous two or more times
+        // the fragment and then service will appear out of sync, because one or more tracks
+        // will catch the service while it's preparing the next track. These tracks will not be played
+        // Instead of simply returning there must be some sort of blocking for the playPause(String...) method
         if (mIsPreparing) {
             Log.d(TAG_LOG, "Media service is already preparing a playback; returning...");
 
@@ -214,20 +151,12 @@ public class MediaPlayerService extends Service
         //Stop playback
         stop();
 
-//        //Get track
-//        mCurrentTrack = mTracksList.get(trackId);
-//        mCurrentTrackIndex = mTracksList.indexOf(mCurrentTrack);
-//        String trackUrl = mCurrentTrack.previewUrl;
-
-//        //Notify track to be played
-//        broadcastTrackToBePlayed();
-
         //Start Media Player
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setOnPreparedListener(this);
-//        mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnCompletionListener(this);
+        mMediaPlayer.setOnSeekCompleteListener(this);
         try {
             mIsPreparing = true;
 
@@ -251,9 +180,9 @@ public class MediaPlayerService extends Service
         intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_PAUSED);
         sendBroadcast(intent);
 
-//        if (mBroadcastTrackProgressTask != null)
-//            mBroadcastTrackProgressTask.cancel(true);
-//
+        if (mBroadcastProgressTask != null)
+            mBroadcastProgressTask.cancel(true);
+
 //        showNotification();
     }
 
@@ -275,10 +204,8 @@ public class MediaPlayerService extends Service
         intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_STOPPED);
         sendBroadcast(intent);
 
-        //this.stopService();
-
-//        if (mBroadcastTrackProgressTask != null)
-//            mBroadcastTrackProgressTask.cancel(true);
+        if (mBroadcastProgressTask != null)
+            mBroadcastProgressTask.cancel(true);
     }
 
     private void resume() {
@@ -293,13 +220,47 @@ public class MediaPlayerService extends Service
         sendBroadcast(intent);
 
         intent = new Intent(CALLBACK_MEDIASERVICE);
-        intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_SET_DURATION);
+        intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_BROADCAST_DURATION);
         intent.putExtra(TRACK_DURATION, mMediaPlayer.getDuration());
         sendBroadcast(intent);
 
-//        mBroadcastTrackProgressTask = new BroadcastTrackProgressTask();
-//        mBroadcastTrackProgressTask.execute();
-//
+        mBroadcastProgressTask = new BroadcastProgressTask();
+        mBroadcastProgressTask.execute();
+
 //        showNotification();
+    }
+
+    class BroadcastProgressTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            while (!isCancelled()) {
+                try {
+                    Thread.sleep(350);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (!mMediaPlayer.isPlaying())
+                    return null;
+
+                broadcastProgress();
+            }
+
+            return null;
+        }
+    }
+
+    private void broadcastProgress() {
+        Intent intent = new Intent(CALLBACK_MEDIASERVICE);
+        intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_BROADCAST_PROGRESS);
+        intent.putExtra(TRACK_PROGRESS, mMediaPlayer.getCurrentPosition());
+        sendBroadcast(intent);
+    }
+
+    private void broadcastMaxProgress() {
+        Intent intent = new Intent(CALLBACK_MEDIASERVICE);
+        intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_BROADCAST_PROGRESS);
+        intent.putExtra(TRACK_PROGRESS, mMediaPlayer.getDuration());
+        sendBroadcast(intent);
     }
 }

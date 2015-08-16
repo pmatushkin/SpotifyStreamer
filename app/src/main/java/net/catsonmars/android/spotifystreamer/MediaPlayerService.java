@@ -49,6 +49,34 @@ public class MediaPlayerService extends Service
     private static Boolean mIsPreparing;
     private BroadcastProgressTask mBroadcastProgressTask;
 
+    /* Public methods */
+    public static void playPause(Context context, String trackUrl) {
+        Intent intent = new Intent(context, MediaPlayerService.class);
+        intent.setAction(ACTION_PLAYPAUSE);
+        intent.putExtra(TRACK_URL, trackUrl);
+
+        context.startService(intent);
+    }
+
+    public static void stop(Context context) {
+        Intent intent = new Intent(context, MediaPlayerService.class);
+        intent.setAction(ACTION_STOP);
+
+        context.startService(intent);
+    }
+
+    public static void seek(Context context, int position) {
+        Intent intent = new Intent(context, MediaPlayerService.class);
+        intent.setAction(ACTION_SEEK);
+        intent.putExtra(TRACK_SEEK_POSITION, position);
+
+        context.startService(intent);
+    }
+
+    public static boolean isPreparing() {
+        return mIsPreparing;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -89,6 +117,7 @@ public class MediaPlayerService extends Service
         throw new UnsupportedOperationException("Binding is not supported");
     }
 
+    /* Private methods */
     private void handleCommand(Intent intent) {
         //Play/pause track
         if (intent.getAction().equals(ACTION_PLAYPAUSE)) {
@@ -108,29 +137,7 @@ public class MediaPlayerService extends Service
         }
     }
 
-    public static void playPause(Context context, String trackUrl) {
-        Intent intent = new Intent(context, MediaPlayerService.class);
-        intent.setAction(ACTION_PLAYPAUSE);
-        intent.putExtra(TRACK_URL, trackUrl);
-
-        context.startService(intent);
-    }
-
-    public static void stop(Context context) {
-        Intent intent = new Intent(context, MediaPlayerService.class);
-        intent.setAction(ACTION_STOP);
-
-        context.startService(intent);
-    }
-
-    public static void seek(Context context, int position) {
-        Intent intent = new Intent(context, MediaPlayerService.class);
-        intent.setAction(ACTION_SEEK);
-        intent.putExtra(TRACK_SEEK_POSITION, position);
-
-        context.startService(intent);
-    }
-
+    // this method selects between playing and pausing
     private void playPause(String trackUrl) {
         // return if the media service is already preparing a playback
         if (mIsPreparing) {
@@ -165,10 +172,6 @@ public class MediaPlayerService extends Service
                 && null != mTrackUrl
                 && !mTrackUrl.isEmpty()
                 && mTrackUrl.equals(trackUrl);
-    }
-
-    public static boolean isPreparing() {
-        return mIsPreparing;
     }
 
     private void play(String trackUrl) {
@@ -207,8 +210,6 @@ public class MediaPlayerService extends Service
 
         if (mBroadcastProgressTask != null)
             mBroadcastProgressTask.cancel(true);
-
-//        showNotification();
     }
 
     private void stop() {
@@ -253,8 +254,6 @@ public class MediaPlayerService extends Service
 
         mBroadcastProgressTask = new BroadcastProgressTask();
         mBroadcastProgressTask.execute();
-
-//        showNotification();
     }
 
     class BroadcastProgressTask extends AsyncTask<Void, Void, Void> {
@@ -287,6 +286,10 @@ public class MediaPlayerService extends Service
         sendBroadcast(intent);
     }
 
+    // This is to make sure the service always broadcasts
+    // the full duration of the track upon playback completion.
+    // Basically we want to make sure the seek bar is always
+    // in the rightmost position when the playback is completed
     private void broadcastMaxProgress() {
         Intent intent = new Intent(CALLBACK_MEDIASERVICE);
         intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_BROADCAST_PROGRESS);

@@ -23,7 +23,7 @@ public class MainActivity extends ActionBarActivity
         implements ArtistsFragment.Callback,
         NowPlayingFragment.TopTenTracksCallback {
 
-    private final String LOG_TAG = "SPOTIFY_STREAMER";
+    private final String TAG_LOG = "SPOTIFY_STREAMER";
     private static final String TAG_FRAGMENT = "artists_fragment";
     private static final String TAG_TRACKSFRAGMENT = "TFTAG";
 
@@ -36,11 +36,11 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         if (null == findViewById(R.id.fragment_tracks_container)) {
-            Log.d(LOG_TAG, "initializing phone UI");
+            Log.d(TAG_LOG, "initializing phone UI");
 
             mTwoPane = false;
         } else {
-            Log.d(LOG_TAG, "initializing tablet UI");
+            Log.d(TAG_LOG, "initializing tablet UI");
 
             mTwoPane = true;
 

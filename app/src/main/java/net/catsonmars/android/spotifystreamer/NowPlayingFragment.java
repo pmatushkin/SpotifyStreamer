@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -85,10 +84,13 @@ public class NowPlayingFragment extends DialogFragment
             Log.d(TAG_LOG, "Current track: " + mCurrentTrack.name);
         }
 
+        // loading the current track and starting a playback, unless
+        // there was a fragment state, in which case we are probably already playing it
         Boolean startPlayback = null == savedInstanceState
                 || !savedInstanceState.containsKey(STATE_SAVED);
         loadCurrentTrack(startPlayback);
 
+        // setting up the button listeners; might as well check if the buttons are actually there, because why not
         View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
         if (null == viewPlayPause) {
             Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
@@ -108,29 +110,35 @@ public class NowPlayingFragment extends DialogFragment
             viewNextTrack.setOnClickListener(this);
         }
 
+        // setting up the seek bar listeners
         SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
-        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    onPlaybackPositionChanged(progress);
+        if (null == sb) {
+            Log.e(TAG_LOG, "Seek bar button not found; check the Now Playing layout");
+        } else {
+            sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (fromUser) {
+                        onPlaybackPositionChanged(progress);
+                    }
                 }
-            }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
 
-            }
+                }
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
 
-            }
-        });
+                }
+            });
+        }
 
         return rootView;
     }
 
+    // this is the default overload for the compatibility with the code that was already there
     private void loadCurrentTrack() {
         loadCurrentTrack(true);
     }
@@ -223,6 +231,11 @@ public class NowPlayingFragment extends DialogFragment
         MediaPlayerService.playPause(mTopTenTracks.getActivity(), mCurrentTrack.preview_url);
     }
 
+    // Don't load the next track if the previous one is still preparing;
+    // otherwise the service might attempt to start playing the track you just selected,
+    // and it won't be allowed, so you end up with the fragment displaying the next track
+    // and the service playing the previous track.
+    // You can trigger this condition by pressing the Previous button repeatedly. Same goes for the onNextTrack()
     private void onPreviousTrack() {
         if (MediaPlayerService.isPreparing()) {
             Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_is_preparing_track), Toast.LENGTH_SHORT);
@@ -287,34 +300,7 @@ public class NowPlayingFragment extends DialogFragment
         mTrackProgress = 0;
     }
 
-    @Override
-    public void onPause() {
-        Log.d(TAG_LOG, "NowPlayingFragment.onPause");
-
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(TAG_LOG, "NowPlayingFragment.onResume");
-
-        super.onResume();
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        Log.d(TAG_LOG, "NowPlayingFragment.onDismiss");
-
-        super.onDismiss(dialog);
-    }
-
-    @Override
-    public void onCancel(DialogInterface dialog) {
-        Log.d(TAG_LOG, "NowPlayingFragment.onCancel");
-
-        super.onCancel(dialog);
-    }
-
+    // save the flag to make sure we can find out later if the configuration was changed
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.d(TAG_LOG, "NowPlayingFragment.onSaveInstanceState");
@@ -332,8 +318,6 @@ public class NowPlayingFragment extends DialogFragment
 
         Log.d(TAG_LOG, "Stopping media player in onDestroy...");
         MediaPlayerService.stop(mTopTenTracks.getActivity());
-//        Log.d(TAG_LOG, "Stopping media player service in onDestroy...");
-//        MediaPlayerService.stopService(mTopTenTracks.getActivity());
     }
 
     @Override
@@ -418,15 +402,12 @@ public class NowPlayingFragment extends DialogFragment
         } else {
             Log.d(TAG_LOG, "Unknown callback object: " + intent.getAction());
         }
-        //Toast.makeText(mTopTenTracks.getActivity(), "OnPrepared received", Toast.LENGTH_SHORT).show();
     }
 
     private void setTrackDuration(Intent intent) {
         if (intent.hasExtra(MediaPlayerService.TRACK_DURATION)) {
             mTrackDuration = intent.getIntExtra(MediaPlayerService.TRACK_DURATION, 0);
             Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)mTrackDuration));
-//            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)3601230));
-//            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)45000));
 
             displayTrackDuration();
         }

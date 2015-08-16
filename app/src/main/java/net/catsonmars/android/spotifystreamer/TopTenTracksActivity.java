@@ -22,7 +22,6 @@ public class TopTenTracksActivity extends ActionBarActivity
         implements NowPlayingFragment.TopTenTracksCallback {
 
     private final String TAG_LOG = "SPOTIFY_STREAMER";
-//    private static final String TAG_FRAGMENT = "tracks_fragment";
     private static final String TAG_TRACKSFRAGMENT = "TFTAG";
     private static final String KEY_SUBTITLE = "KEY_SUBTITLE";
 
@@ -144,50 +143,6 @@ public class TopTenTracksActivity extends ActionBarActivity
             }
         }
     }
-
-//    public Track getPreviousTrack() {
-//        Fragment f = getSupportFragmentManager().findFragmentByTag(TAG_TRACKSFRAGMENT);
-//
-//        if (null == f) {
-//            return null;
-//        } else {
-//            ListView listView = (ListView)this.findViewById(R.id.lvTracks);
-//
-//            if (null == listView) {
-//                return null;
-//            } else {
-//                int position = ((TopTenTracksActivityFragment)f).getSelectedItemPosition() - 1;
-//
-//                if (position < 0) {
-//                    return null;
-//                } else {
-//                    return (Track) listView.getItemAtPosition(position);
-//                }
-//            }
-//        }
-//    }
-//
-//    public Track getNextTrack() {
-//        Fragment f = getSupportFragmentManager().findFragmentByTag(TAG_TRACKSFRAGMENT);
-//
-//        if (null == f) {
-//            return null;
-//        } else {
-//            ListView listView = (ListView)this.findViewById(R.id.lvTracks);
-//
-//            if (null == listView) {
-//                return null;
-//            } else {
-//                int position = ((TopTenTracksActivityFragment)f).getSelectedItemPosition() + 1;
-//
-//                if (listView.getAdapter().getCount() <= position) {
-//                    return null;
-//                } else {
-//                    return (Track) listView.getItemAtPosition(position);
-//                }
-//            }
-//        }
-//    }
 
     public Boolean moveToPreviousTrack(){
         TopTenTracksActivityFragment f = (TopTenTracksActivityFragment)getSupportFragmentManager().findFragmentByTag(TAG_TRACKSFRAGMENT);

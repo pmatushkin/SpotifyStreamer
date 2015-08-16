@@ -90,28 +90,28 @@
                 android:layout_alignRight="@id/seekBar"
                 android:layout_marginBottom="8dp" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btnPreviousTrack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableTop="@android:drawable/ic_media_previous"
+                android:src="@android:drawable/ic_media_previous"
                 android:layout_below="@+id/txtTrackLengthBegin"
                 android:layout_alignStart="@+id/txtTrackLengthBegin"
                 android:layout_alignLeft="@id/txtTrackLengthBegin" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btnPlayPause"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableTop="@android:drawable/ic_media_play"
+                android:src="@android:drawable/ic_media_play"
                 android:layout_below="@+id/txtTrackLengthBegin"
                 android:layout_centerHorizontal="true" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btnNextTrack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableTop="@android:drawable/ic_media_next"
+                android:src="@android:drawable/ic_media_next"
                 android:layout_below="@+id/txtTrackLengthBegin"
                 android:layout_alignEnd="@+id/txtTrackLengthEnd"
                 android:layout_alignRight="@id/txtTrackLengthEnd" />

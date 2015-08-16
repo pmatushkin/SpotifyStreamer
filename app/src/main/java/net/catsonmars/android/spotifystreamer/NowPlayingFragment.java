@@ -14,7 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -478,7 +478,7 @@ public class NowPlayingFragment extends DialogFragment
         if (null == viewPlayPause) {
             Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
         } else {
-            ((Button)viewPlayPause).setCompoundDrawablesRelativeWithIntrinsicBounds(android.R.drawable.ic_media_pause, 0, 0, 0);
+            ((ImageButton)viewPlayPause).setImageResource(android.R.drawable.ic_media_pause);
         }
     }
 
@@ -488,7 +488,7 @@ public class NowPlayingFragment extends DialogFragment
         if (null == viewPlayPause) {
             Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
         } else {
-            ((Button)viewPlayPause).setCompoundDrawablesRelativeWithIntrinsicBounds(android.R.drawable.ic_media_play, 0, 0, 0);
+            ((ImageButton)viewPlayPause).setImageResource(android.R.drawable.ic_media_play);
         }
     }
 }

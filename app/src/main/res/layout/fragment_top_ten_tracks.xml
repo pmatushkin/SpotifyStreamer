@@ -10,7 +10,7 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/lvTracks">
-    </ListView>
+        android:id="@+id/lvTracks"
+        android:choiceMode="singleChoice" />
 
 </LinearLayout>

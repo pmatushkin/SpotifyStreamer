@@ -36,11 +36,13 @@ public class MediaPlayerService extends Service
     // internal action strings
     static final String ACTION_PLAYPAUSE = "ACTION_PLAYPAUSE";
     static final String ACTION_STOP = "ACTION_STOP";
+    static final String ACTION_SEEK = "ACTION_SEEK";
 
     // internal and external object keys
     private static final String TRACK_URL = "TRACK_URL";
     public static final String TRACK_DURATION = "TRACK_DURATION";
     public static final String TRACK_PROGRESS = "TRACK_PROGRESS";
+    private static final String TRACK_SEEK_POSITION = "TRACK_SEEK_POSITION";
 
     private String mTrackUrl;
     private MediaPlayer mMediaPlayer;
@@ -78,7 +80,7 @@ public class MediaPlayerService extends Service
 
     @Override
     public void onSeekComplete(MediaPlayer mp) {
-
+        resume();
     }
 
     @Nullable
@@ -98,6 +100,12 @@ public class MediaPlayerService extends Service
         if (intent.getAction().equals(ACTION_STOP)) {
             stop();
         }
+
+        //Seek new position
+        if (intent.getAction().equals(ACTION_SEEK)) {
+            int position = intent.getIntExtra(TRACK_SEEK_POSITION, 0);
+            seek(position);
+        }
     }
 
     public static void playPause(Context context, String trackUrl) {
@@ -111,6 +119,14 @@ public class MediaPlayerService extends Service
     public static void stop(Context context) {
         Intent intent = new Intent(context, MediaPlayerService.class);
         intent.setAction(ACTION_STOP);
+
+        context.startService(intent);
+    }
+
+    public static void seek(Context context, int position) {
+        Intent intent = new Intent(context, MediaPlayerService.class);
+        intent.setAction(ACTION_SEEK);
+        intent.putExtra(TRACK_SEEK_POSITION, position);
 
         context.startService(intent);
     }
@@ -135,6 +151,15 @@ public class MediaPlayerService extends Service
             } else {
                 resume();
             }
+        }
+    }
+
+    private void seek(int position) {
+        if (mMediaPlayer == null)
+            return;
+
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.seekTo(position);
         }
     }
 
@@ -240,7 +265,10 @@ public class MediaPlayerService extends Service
                     e.printStackTrace();
                 }
 
-                if (!mMediaPlayer.isPlaying())
+                // checking for null to synchronize the stop() and BroadcastProgress functionalities
+                // after the playback position was updated followed by the immediate fragment dismissal
+                if (null == mMediaPlayer
+                        || !mMediaPlayer.isPlaying())
                     return null;
 
                 broadcastProgress();

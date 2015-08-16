@@ -113,7 +113,7 @@ public class NowPlayingFragment extends DialogFragment
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    Log.d(TAG_LOG, "Progress: " + progress);
+                    onPlaybackPositionChanged(progress);
                 }
             }
 
@@ -241,6 +241,10 @@ public class NowPlayingFragment extends DialogFragment
             Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_no_next_track), Toast.LENGTH_LONG);
             toast.show();
         }
+    }
+
+    private void onPlaybackPositionChanged(int position) {
+        MediaPlayerService.seek(mTopTenTracks.getActivity(), position);
     }
 
     @Override

@@ -21,6 +21,7 @@
     <string name="warn_empty_current_track">Current track not found</string>
     <string name="warn_no_next_track">This is the last track in the queue</string>
     <string name="warn_no_previous_track">This is the first track in the queue</string>
+    <string name="warn_is_preparing_track">Preparing for playback</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment 2</string>

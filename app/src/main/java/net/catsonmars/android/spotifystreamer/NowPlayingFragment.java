@@ -224,22 +224,32 @@ public class NowPlayingFragment extends DialogFragment
     }
 
     private void onPreviousTrack() {
-        if (mTopTenTracks.moveToPreviousTrack()) {
-            mCurrentTrack = mTopTenTracks.getCurrentTrack();
-            loadCurrentTrack();
-        } else {
-            Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_no_previous_track), Toast.LENGTH_LONG);
+        if (MediaPlayerService.isPreparing()) {
+            Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_is_preparing_track), Toast.LENGTH_SHORT);
             toast.show();
+        } else {
+            if (mTopTenTracks.moveToPreviousTrack()) {
+                mCurrentTrack = mTopTenTracks.getCurrentTrack();
+                loadCurrentTrack();
+            } else {
+                Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_no_previous_track), Toast.LENGTH_LONG);
+                toast.show();
+            }
         }
     }
 
     private void onNextTrack() {
-        if (mTopTenTracks.moveToNextTrack()) {
-            mCurrentTrack = mTopTenTracks.getCurrentTrack();
-            loadCurrentTrack();
-        } else {
-            Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_no_next_track), Toast.LENGTH_LONG);
+        if (MediaPlayerService.isPreparing()) {
+            Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_is_preparing_track), Toast.LENGTH_SHORT);
             toast.show();
+        } else {
+            if (mTopTenTracks.moveToNextTrack()) {
+                mCurrentTrack = mTopTenTracks.getCurrentTrack();
+                loadCurrentTrack();
+            } else {
+                Toast toast = Toast.makeText(mTopTenTracks.getActivity(), getString(R.string.warn_no_next_track), Toast.LENGTH_LONG);
+                toast.show();
+            }
         }
     }
 

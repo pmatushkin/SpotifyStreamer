@@ -46,7 +46,7 @@ public class MediaPlayerService extends Service
 
     private String mTrackUrl;
     private MediaPlayer mMediaPlayer;
-    private Boolean mIsPreparing;
+    private static Boolean mIsPreparing;
     private BroadcastProgressTask mBroadcastProgressTask;
 
     @Override
@@ -133,10 +133,6 @@ public class MediaPlayerService extends Service
 
     private void playPause(String trackUrl) {
         // return if the media service is already preparing a playback
-        // TODO: here's a problem. if the user quickly clicks Next or Previous two or more times
-        // the fragment and then service will appear out of sync, because one or more tracks
-        // will catch the service while it's preparing the next track. These tracks will not be played
-        // Instead of simply returning there must be some sort of blocking for the playPause(String...) method
         if (mIsPreparing) {
             Log.d(TAG_LOG, "Media service is already preparing a playback; returning...");
 
@@ -169,6 +165,10 @@ public class MediaPlayerService extends Service
                 && null != mTrackUrl
                 && !mTrackUrl.isEmpty()
                 && mTrackUrl.equals(trackUrl);
+    }
+
+    public static boolean isPreparing() {
+        return mIsPreparing;
     }
 
     private void play(String trackUrl) {
@@ -220,6 +220,8 @@ public class MediaPlayerService extends Service
             mMediaPlayer.stop();
 
         mTrackUrl = "";
+        mIsPreparing = false;
+
         mMediaPlayer.setOnPreparedListener(null);
         mMediaPlayer.reset();
         mMediaPlayer.release();

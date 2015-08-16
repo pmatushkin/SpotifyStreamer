@@ -7,16 +7,21 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp">
 
         <TextView
             android:id="@+id/txtArtistName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
             android:text="@string/hello_blank_fragment"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_centerHorizontal="true"
+            android:autoText="false"
+            android:ellipsize="end"
+            android:singleLine="true" />
 
         <TextView
             android:id="@+id/txtAlbumName"
@@ -25,7 +30,9 @@
             android:layout_below="@+id/txtArtistName"
             android:layout_centerHorizontal="true"
             android:text="@string/hello_blank_fragment"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:ellipsize="end"
+            android:singleLine="true" />
 
         <ImageView
             android:id="@+id/imgTrackArt"
@@ -39,68 +46,77 @@
 
         <TextView
             android:id="@+id/txtTrackName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:layout_below="@+id/imgTrackArt"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="16dp"
             android:text="@string/hello_blank_fragment"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:gravity="center" />
 
-        <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtTrackName"
-            android:layout_centerHorizontal="true"
-            android:maxWidth="400dp"
-            android:minWidth="400dp"
-            android:progress="50"
-            android:thumbOffset="10dp" />
+            android:layout_marginBottom="8dp">
 
-        <TextView
-            android:id="@+id/txtTrackLengthBegin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_textview_start_track_length"
-            android:layout_below="@+id/seekBar"
-            android:layout_alignStart="@+id/seekBar"
-            android:layout_alignLeft="@id/seekBar" />
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:maxWidth="400dp"
+                android:minWidth="400dp"
+                android:progress="50"
+                android:thumbOffset="10dp" />
 
-        <TextView
-            android:id="@+id/txtTrackLengthEnd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_textview_start_track_length"
-            android:layout_below="@+id/seekBar"
-            android:layout_alignEnd="@+id/seekBar"
-            android:layout_alignRight="@id/seekBar" />
+            <TextView
+                android:id="@+id/txtTrackLengthBegin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_textview_start_track_length"
+                android:layout_below="@+id/seekBar"
+                android:layout_alignStart="@+id/seekBar"
+                android:layout_alignLeft="@id/seekBar"
+                android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/btnPreviousTrack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableTop="@android:drawable/ic_media_previous"
-            android:layout_below="@+id/txtTrackLengthBegin"
-            android:layout_alignStart="@+id/txtTrackLengthBegin"
-            android:layout_alignLeft="@id/txtTrackLengthBegin" />
+            <TextView
+                android:id="@+id/txtTrackLengthEnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_textview_start_track_length"
+                android:layout_below="@+id/seekBar"
+                android:layout_alignEnd="@+id/seekBar"
+                android:layout_alignRight="@id/seekBar"
+                android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/btnPlayPause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableTop="@android:drawable/ic_media_play"
-            android:layout_below="@+id/txtTrackLengthBegin"
-            android:layout_centerHorizontal="true" />
+            <Button
+                android:id="@+id/btnPreviousTrack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@android:drawable/ic_media_previous"
+                android:layout_below="@+id/txtTrackLengthBegin"
+                android:layout_alignStart="@+id/txtTrackLengthBegin"
+                android:layout_alignLeft="@id/txtTrackLengthBegin" />
 
-        <Button
-            android:id="@+id/btnNextTrack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableTop="@android:drawable/ic_media_next"
-            android:layout_below="@+id/txtTrackLengthEnd"
-            android:layout_alignEnd="@+id/txtTrackLengthEnd"
-            android:layout_alignRight="@id/txtTrackLengthEnd" />
+            <Button
+                android:id="@+id/btnPlayPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@android:drawable/ic_media_play"
+                android:layout_below="@+id/txtTrackLengthBegin"
+                android:layout_centerHorizontal="true" />
+
+            <Button
+                android:id="@+id/btnNextTrack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@android:drawable/ic_media_next"
+                android:layout_below="@+id/txtTrackLengthBegin"
+                android:layout_alignEnd="@+id/txtTrackLengthEnd"
+                android:layout_alignRight="@id/txtTrackLengthEnd" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

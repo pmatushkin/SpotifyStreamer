@@ -28,7 +28,8 @@ see http://shayla.sawchenko.net/blog/android/2013/09/05/Disable-Softkeyboard/ fo
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/lvArtists"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:choiceMode="singleChoice">
     </ListView>
 
 </LinearLayout>

@@ -198,8 +198,6 @@ public class NowPlayingFragment extends DialogFragment
                 }
             }
 
-            mTrackDuration = 0;
-            mTrackProgress = 0;
             displayTrackDuration();
             displayTrackProgress();
 
@@ -245,6 +243,9 @@ public class NowPlayingFragment extends DialogFragment
             toast.show();
         } else {
             if (mTopTenTracks.moveToPreviousTrack()) {
+                mTrackDuration = 0;
+                mTrackProgress = 0;
+
                 mCurrentTrack = mTopTenTracks.getCurrentTrack();
                 loadCurrentTrack();
             } else {
@@ -260,6 +261,9 @@ public class NowPlayingFragment extends DialogFragment
             toast.show();
         } else {
             if (mTopTenTracks.moveToNextTrack()) {
+                mTrackDuration = 0;
+                mTrackProgress = 0;
+
                 mCurrentTrack = mTopTenTracks.getCurrentTrack();
                 loadCurrentTrack();
             } else {

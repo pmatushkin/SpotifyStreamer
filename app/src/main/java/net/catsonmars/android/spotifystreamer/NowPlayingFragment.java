@@ -198,7 +198,10 @@ public class NowPlayingFragment extends DialogFragment
                 }
             }
 
+            mTrackDuration = 0;
+            mTrackProgress = 0;
             displayTrackDuration();
+            displayTrackProgress();
 
             if (startPlayback) {
                 View viewPlayPause = v.findViewById(R.id.btnPlayPause);
@@ -430,13 +433,25 @@ public class NowPlayingFragment extends DialogFragment
         }
 
         SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
-        sb.setMax(mTrackDuration);
+        if (null == sb) {
+        } else {
+            sb.setMax(mTrackDuration);
+        }
     }
 
     private void displayTrackProgress() {
+        TextView tt = (TextView) rootView.findViewById(R.id.txtTrackLengthBegin);
+        if (null == tt) {
+        } else {
+            tt.setText(getFormattedDuration((long)mTrackProgress));
+        }
+
         SeekBar sb = (SeekBar) rootView.findViewById(R.id.seekBar);
-        sb.setMax(mTrackDuration);
-        sb.setProgress(mTrackProgress);
+        if (null == sb) {
+        } else {
+            sb.setMax(mTrackDuration);
+            sb.setProgress(mTrackProgress);
+        }
     }
 
     private String getFormattedDuration(long millis) {

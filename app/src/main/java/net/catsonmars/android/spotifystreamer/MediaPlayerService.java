@@ -261,7 +261,7 @@ public class MediaPlayerService extends Service
         protected Void doInBackground(Void... voids) {
             while (!isCancelled()) {
                 try {
-                    Thread.sleep(350);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -37,6 +37,7 @@ public class NowPlayingFragment extends DialogFragment
     private Track mCurrentTrack;
     private int mTrackDuration;
     private int mTrackProgress;
+    private int mPlayPauseIcon;
 
     View rootView;
 
@@ -83,6 +84,9 @@ public class NowPlayingFragment extends DialogFragment
         } else {
             Log.d(TAG_LOG, "Current track: " + mCurrentTrack.name);
         }
+
+        // displaying the right Play/Pause icon
+        displayPlayPauseIcon();
 
         // loading the current track and starting a playback, unless
         // there was a fragment state, in which case we are probably already playing it
@@ -305,6 +309,7 @@ public class NowPlayingFragment extends DialogFragment
 
         mTrackDuration = 0;
         mTrackProgress = 0;
+        mPlayPauseIcon = android.R.drawable.ic_media_play;
     }
 
     // save the flag to make sure we can find out later if the configuration was changed
@@ -473,22 +478,26 @@ public class NowPlayingFragment extends DialogFragment
     }
 
     private void onTrackPrepared(Intent intent) {
-        View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
-
-        if (null == viewPlayPause) {
-            Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
-        } else {
-            ((ImageButton)viewPlayPause).setImageResource(android.R.drawable.ic_media_pause);
-        }
+        setPlayPauseIcon(android.R.drawable.ic_media_pause);
     }
 
     private void onTrackPaused(Intent intent) {
+        setPlayPauseIcon(android.R.drawable.ic_media_play);
+    }
+
+    private void setPlayPauseIcon(int icon) {
+        mPlayPauseIcon = icon;
+
+        displayPlayPauseIcon();
+    }
+
+    private void displayPlayPauseIcon() {
         View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
 
         if (null == viewPlayPause) {
             Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
         } else {
-            ((ImageButton)viewPlayPause).setImageResource(android.R.drawable.ic_media_play);
+            ((ImageButton)viewPlayPause).setImageResource(mPlayPauseIcon);
         }
     }
 }

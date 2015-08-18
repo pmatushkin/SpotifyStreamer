@@ -1,0 +1,153 @@
+diff --git a/app/src/main/java/net/catsonmars/android/spotifystreamer/NowPlayingFragment.java b/app/src/main/java/net/catsonmars/android/spotifystreamer/NowPlayingFragment.java
+index cb83d0a..671a7da 100644
+--- a/app/src/main/java/net/catsonmars/android/spotifystreamer/NowPlayingFragment.java
++++ b/app/src/main/java/net/catsonmars/android/spotifystreamer/NowPlayingFragment.java
+@@ -37,6 +37,7 @@ public class NowPlayingFragment extends DialogFragment
+     private Track mCurrentTrack;
+     private int mTrackDuration;
+     private int mTrackProgress;
++    private int mPlayPauseIcon;
+ 
+     View rootView;
+ 
+@@ -84,6 +85,9 @@ public class NowPlayingFragment extends DialogFragment
+             Log.d(TAG_LOG, "Current track: " + mCurrentTrack.name);
+         }
+ 
++        // displaying the right Play/Pause icon
++        displayPlayPauseIcon();
++
+         // loading the current track and starting a playback, unless
+         // there was a fragment state, in which case we are probably already playing it
+         Boolean startPlayback = null == savedInstanceState
+@@ -278,6 +282,19 @@ public class NowPlayingFragment extends DialogFragment
+     }
+ 
+     @Override
++    public void onCreate(Bundle savedInstanceState) {
++        Log.d(TAG_LOG, "NowPlayingFragment.onCreate");
++
++        super.onCreate(savedInstanceState);
++
++        this.setRetainInstance(true);
++
++        mTrackDuration = 0;
++        mTrackProgress = 0;
++        mPlayPauseIcon = android.R.drawable.ic_media_play;
++    }
++
++    @Override
+     public void onStart() {
+         Log.d(TAG_LOG, "NowPlayingFragment.onStart");
+ 
+@@ -295,18 +312,6 @@ public class NowPlayingFragment extends DialogFragment
+         mTopTenTracks.getActivity().unregisterReceiver(mOnMediaPlayerServiceCallback);
+     }
+ 
+-    @Override
+-    public void onCreate(Bundle savedInstanceState) {
+-        Log.d(TAG_LOG, "NowPlayingFragment.onCreate");
+-
+-        super.onCreate(savedInstanceState);
+-
+-        this.setRetainInstance(true);
+-
+-        mTrackDuration = 0;
+-        mTrackProgress = 0;
+-    }
+-
+     // save the flag to make sure we can find out later if the configuration was changed
+     @Override
+     public void onSaveInstanceState(Bundle outState) {
+@@ -390,11 +395,11 @@ public class NowPlayingFragment extends DialogFragment
+ 
+                     break;
+                 }
+-                case MediaPlayerService.ACTION_TRACK_BROADCAST_DURATION : {
+-                    setTrackDuration(intent);
+-
+-                    break;
+-                }
++//                case MediaPlayerService.ACTION_TRACK_BROADCAST_DURATION : {
++//                    setTrackDuration(intent);
++//
++//                    break;
++//                }
+                 case MediaPlayerService.ACTION_TRACK_BROADCAST_PROGRESS : {
+                     setTrackProgress(intent);
+ 
+@@ -411,16 +416,9 @@ public class NowPlayingFragment extends DialogFragment
+         }
+     }
+ 
+-    private void setTrackDuration(Intent intent) {
+-        if (intent.hasExtra(MediaPlayerService.TRACK_DURATION)) {
+-            mTrackDuration = intent.getIntExtra(MediaPlayerService.TRACK_DURATION, 0);
+-            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)mTrackDuration));
+-
+-            displayTrackDuration();
+-        }
+-    }
+-
+     private void setTrackProgress(Intent intent) {
++        setTrackDuration(intent);
++
+         if (intent.hasExtra(MediaPlayerService.TRACK_PROGRESS)) {
+             mTrackProgress = intent.getIntExtra(MediaPlayerService.TRACK_PROGRESS, 0);
+             Log.d(TAG_LOG, "Track progress: " + getFormattedDuration((long)mTrackProgress));
+@@ -429,6 +427,19 @@ public class NowPlayingFragment extends DialogFragment
+         }
+     }
+ 
++    private void setTrackDuration(Intent intent) {
++        if (intent.hasExtra(MediaPlayerService.TRACK_DURATION)) {
++            int duration = intent.getIntExtra(MediaPlayerService.TRACK_DURATION, 0);
++
++            if (mTrackDuration != duration) {
++                mTrackDuration = duration;
++                Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long) mTrackDuration));
++
++                displayTrackDuration();
++            }
++        }
++    }
++
+     private void displayTrackDuration() {
+         TextView tt = (TextView) rootView.findViewById(R.id.txtTrackLengthEnd);
+         if (null == tt) {
+@@ -473,22 +484,26 @@ public class NowPlayingFragment extends DialogFragment
+     }
+ 
+     private void onTrackPrepared(Intent intent) {
+-        View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
+-
+-        if (null == viewPlayPause) {
+-            Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
+-        } else {
+-            ((ImageButton)viewPlayPause).setImageResource(android.R.drawable.ic_media_pause);
+-        }
++        setPlayPauseIcon(android.R.drawable.ic_media_pause);
+     }
+ 
+     private void onTrackPaused(Intent intent) {
++        setPlayPauseIcon(android.R.drawable.ic_media_play);
++    }
++
++    private void setPlayPauseIcon(int icon) {
++        mPlayPauseIcon = icon;
++
++        displayPlayPauseIcon();
++    }
++
++    private void displayPlayPauseIcon() {
+         View viewPlayPause = rootView.findViewById(R.id.btnPlayPause);
+ 
+         if (null == viewPlayPause) {
+             Log.e(TAG_LOG, "Play/Pause button not found; check the Now Playing layout");
+         } else {
+-            ((ImageButton)viewPlayPause).setImageResource(android.R.drawable.ic_media_play);
++            ((ImageButton)viewPlayPause).setImageResource(mPlayPauseIcon);
+         }
+     }
+ }
+\ No newline at end of file

@@ -395,11 +395,6 @@ public class NowPlayingFragment extends DialogFragment
 
                     break;
                 }
-                case MediaPlayerService.ACTION_TRACK_BROADCAST_DURATION : {
-                    setTrackDuration(intent);
-
-                    break;
-                }
                 case MediaPlayerService.ACTION_TRACK_BROADCAST_PROGRESS : {
                     setTrackProgress(intent);
 
@@ -418,14 +413,20 @@ public class NowPlayingFragment extends DialogFragment
 
     private void setTrackDuration(Intent intent) {
         if (intent.hasExtra(MediaPlayerService.TRACK_DURATION)) {
-            mTrackDuration = intent.getIntExtra(MediaPlayerService.TRACK_DURATION, 0);
-            Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long)mTrackDuration));
+            int duration = intent.getIntExtra(MediaPlayerService.TRACK_DURATION, 0);
 
-            displayTrackDuration();
+            if (mTrackDuration != duration) {
+                mTrackDuration = duration;
+                Log.d(TAG_LOG, "Track duration: " + getFormattedDuration((long) mTrackDuration));
+
+                displayTrackDuration();
+            }
         }
     }
 
     private void setTrackProgress(Intent intent) {
+        setTrackDuration(intent);
+
         if (intent.hasExtra(MediaPlayerService.TRACK_PROGRESS)) {
             mTrackProgress = intent.getIntExtra(MediaPlayerService.TRACK_PROGRESS, 0);
             Log.d(TAG_LOG, "Track progress: " + getFormattedDuration((long)mTrackProgress));

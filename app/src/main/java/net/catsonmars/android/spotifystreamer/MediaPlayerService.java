@@ -30,7 +30,6 @@ public class MediaPlayerService extends Service
     public static final String ACTION_TRACK_PLAYED = "ACTION_TRACK_PLAYED";
     public static final String ACTION_TRACK_PAUSED = "ACTION_TRACK_PAUSED";
     public static final String ACTION_TRACK_STOPPED = "ACTION_TRACK_STOPPED";
-    public static final String ACTION_TRACK_BROADCAST_DURATION = "ACTION_TRACK_SET_DURATION";
     public static final String ACTION_TRACK_BROADCAST_PROGRESS = "ACTION_TRACK_BROADCAST_PROGRESS";
 
     // internal action strings
@@ -247,11 +246,6 @@ public class MediaPlayerService extends Service
         intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_PLAYED);
         sendBroadcast(intent);
 
-        intent = new Intent(CALLBACK_MEDIASERVICE);
-        intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_BROADCAST_DURATION);
-        intent.putExtra(TRACK_DURATION, mMediaPlayer.getDuration());
-        sendBroadcast(intent);
-
         mBroadcastProgressTask = new BroadcastProgressTask();
         mBroadcastProgressTask.execute();
     }
@@ -259,9 +253,15 @@ public class MediaPlayerService extends Service
     class BroadcastProgressTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
+            final long SLEEP_TIME = 250;
+            long sleepTime = 0;
+
             while (!isCancelled()) {
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(sleepTime);
+                    if (0 == sleepTime) {
+                        sleepTime = SLEEP_TIME;
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -282,6 +282,7 @@ public class MediaPlayerService extends Service
     private void broadcastProgress() {
         Intent intent = new Intent(CALLBACK_MEDIASERVICE);
         intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_BROADCAST_PROGRESS);
+        intent.putExtra(TRACK_DURATION, mMediaPlayer.getDuration());
         intent.putExtra(TRACK_PROGRESS, mMediaPlayer.getCurrentPosition());
         sendBroadcast(intent);
     }
@@ -293,6 +294,7 @@ public class MediaPlayerService extends Service
     private void broadcastMaxProgress() {
         Intent intent = new Intent(CALLBACK_MEDIASERVICE);
         intent.putExtra(CALLBACK_ACTION, ACTION_TRACK_BROADCAST_PROGRESS);
+        intent.putExtra(TRACK_DURATION, mMediaPlayer.getDuration());
         intent.putExtra(TRACK_PROGRESS, mMediaPlayer.getDuration());
         sendBroadcast(intent);
     }

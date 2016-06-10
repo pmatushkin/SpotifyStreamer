@@ -14,3 +14,9 @@ Spotify Streamer app allows its user to connect to the Spotify music library, se
 4. Open the SpotifyStreamer in Android Studio and build it.
 
 For the installation of the individual dependencies please follow the README instructions on their pages.
+
+## Screenshots
+| Artists view | Tracks view | Player view |
+| ------------- | ------------- | ------------- |
+| ![Artists view](https://i.imgur.com/G04S439.jpg "Artists view")  | ![Tracks view](https://i.imgur.com/rYs74G3.jpg "Tracks view") | ![Player view](https://i.imgur.com/S3AGxCa.jpg "Player view") |
+

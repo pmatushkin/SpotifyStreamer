@@ -1,5 +1,5 @@
-# SpotifyStreamer
-SpotifyStreamer app allows its user to connect to the Spotify music library, search for artists, and play the previews of their top ten most popular tracks. Developed and submitted as a final project of the first two Android Developer Nanodegree courses on [Udacity](https://www.udacity.com/).
+# Spotify Streamer
+Spotify Streamer app allows its user to connect to the Spotify music library, search for artists, and play the previews of their top ten most popular tracks. Developed and submitted as a final project of the first two Android Developer Nanodegree courses on [Udacity](https://www.udacity.com/).
 
 ## Dependencies
 * [Picasso](https://github.com/square/picasso) 2.5.2
